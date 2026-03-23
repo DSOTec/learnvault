@@ -24,13 +24,13 @@ export const LanguageSelector: React.FC = () => {
 			}}
 		>
 			<option value="en" style={{ color: "#000" }}>
-				English
+				🇺🇸 English
 			</option>
 			<option value="fr" style={{ color: "#000" }}>
-				Français
+				🇫🇷 Français
 			</option>
 			<option value="sw" style={{ color: "#000" }}>
-				Kiswahili
+				🇰🇪 Kiswahili
 			</option>
 		</select>
 	)
