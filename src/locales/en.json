@@ -5,7 +5,14 @@
 		"github": "GitHub",
 		"tutorial": "Tutorial",
 		"viewDocs": "View docs",
-		"debug": "Debug Contracts"
+		"debug": "Debug Contracts",
+		"learn": "Learn",
+		"dao": "DAO",
+		"leaderboard": "Leaderboard",
+		"profile": "My Profile",
+		"discord": "Discord",
+		"twitter": "Twitter",
+		"docs": "Docs"
 	},
 	"home": {
 		"heroTitle": "Yay! You're on Stellar!",
@@ -72,7 +79,7 @@
 	"wallet": {
 		"loading": "Loading...",
 		"connect": "Connect Wallet",
-		"balance": "Wallet Balance: {{amount}} XLM",
+		"balance": "Wallet Balance: {{amount}} LRN",
 		"connectedAs": "Connected as ",
 		"disconnectPrompt": ". Do you want to disconnect?",
 		"disconnect": "Disconnect",
