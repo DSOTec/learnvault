@@ -11,12 +11,14 @@ import Learn from "./pages/Learn"
 import NotFound from "./pages/NotFound"
 import Profile from "./pages/Profile"
 import Treasury from "./pages/Treasury"
+import Courses from "./pages/Courses"
 
 function App() {
 	return (
 		<Routes>
 			<Route element={<AppLayout />}>
 				<Route path="/" element={<Home />} />
+				<Route path="/courses" element={<Courses />} />
 				<Route path="/learn" element={<Learn />} />
 				<Route path="/dao" element={<Dao />} />
 				<Route path="/leaderboard" element={<Leaderboard />} />

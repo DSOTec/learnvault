@@ -37,16 +37,16 @@ const Home: React.FC = () => {
 				</p>
 				<div className="flex flex-wrap justify-center gap-6 animate-in slide-in-from-bottom-12 duration-1000 delay-600">
 					<Link
-						to="/learn"
+						to="/courses"
 						className="iridescent-border px-12 py-5 rounded-2xl font-black text-lg uppercase tracking-widest hover:scale-105 active:scale-95 transition-all group relative overflow-hidden shadow-2xl shadow-brand-cyan/20"
 					>
-						<span className="relative z-10">{t("nav.learn")}</span>
+						<span className="relative z-10">{t("nav.courses")}</span>
 					</Link>
 					<Link
-						to="/treasury"
+						to="/learn"
 						className="px-12 py-5 glass text-white rounded-2xl font-black text-lg uppercase tracking-widest hover:bg-white/10 hover:scale-105 active:scale-95 transition-all border border-white/10"
 					>
-						{t("nav.treasury")}
+						{t("nav.learn")}
 					</Link>
 				</div>
 			</header>
