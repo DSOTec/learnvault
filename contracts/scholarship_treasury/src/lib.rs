@@ -106,18 +106,19 @@ mod token {
     mod test_token {
         use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
-        const TOKEN_KEY: Symbol = symbol_short!("TOK");
+        // const TOKEN_KEY: Symbol = symbol_short!("TOK");
+        use super::super::USDC_KEY;
 
         pub fn contract_id(env: &Env) -> Address {
             env.storage()
                 .instance()
-                .get::<_, Address>(&TOKEN_KEY)
+                .get::<_, Address>(&USDC_KEY)
                 .expect("token contract not initialized")
         }
 
         pub fn register(env: &Env, admin: &Address) {
             let sac = env.register_stellar_asset_contract_v2(admin.clone());
-            env.storage().instance().set(&TOKEN_KEY, &sac.address());
+            env.storage().instance().set(&USDC_KEY, &sac.address());
         }
 
         pub fn client<'a>(env: &Env) -> soroban_sdk::token::TokenClient<'a> {
