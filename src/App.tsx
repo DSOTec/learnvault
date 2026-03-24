@@ -1,5 +1,6 @@
 import { Routes, Route, Outlet } from "react-router-dom"
 import ComingSoon from "./components/ComingSoon"
+import ErrorBoundary from "./components/ErrorBoundary"
 import Footer from "./components/Footer"
 import NavBar from "./components/NavBar"
 import Admin from "./pages/Admin"
@@ -8,6 +9,7 @@ import Credential from "./pages/Credential"
 import Dao from "./pages/Dao"
 import DaoProposals from "./pages/DaoProposals"
 import Debug from "./pages/Debug"
+import Donor from "./pages/Donor"
 import Home from "./pages/Home"
 import Leaderboard from "./pages/Leaderboard"
 import Learn from "./pages/Learn"
@@ -20,24 +22,126 @@ function App() {
 	return (
 		<Routes>
 			<Route element={<AppLayout />}>
-				<Route path="/" element={<Home />} />
-				<Route path="/courses" element={<Courses />} />
-				<Route path="/learn" element={<Learn />} />
-				<Route path="/dao" element={<Dao />} />
-				<Route path="/dao/proposals" element={<DaoProposals />} />
-				<Route path="/leaderboard" element={<Leaderboard />} />
-				<Route path="/profile" element={<Profile />} />
-				<Route path="/scholarships/apply" element={<ScholarshipApply />} />
-				<Route path="/admin" element={<Admin />} />
-				<Route path="/treasury" element={<Treasury />} />
-				<Route path="/credentials/:nftId" element={<Credential />} />
+				<Route
+					path="/"
+					element={
+						<ErrorBoundary>
+							<Home />
+						</ErrorBoundary>
+					}
+				/>
+				<Route
+					path="/courses"
+					element={
+						<ErrorBoundary>
+							<Courses />
+						</ErrorBoundary>
+					}
+				/>
+				<Route
+					path="/learn"
+					element={
+						<ErrorBoundary>
+							<Learn />
+						</ErrorBoundary>
+					}
+				/>
+				<Route
+					path="/dao"
+					element={
+						<ErrorBoundary>
+							<Dao />
+						</ErrorBoundary>
+					}
+				/>
+				<Route
+					path="/dao/proposals"
+					element={
+						<ErrorBoundary>
+							<DaoProposals />
+						</ErrorBoundary>
+					}
+				/>
+				<Route
+					path="/leaderboard"
+					element={
+						<ErrorBoundary>
+							<Leaderboard />
+						</ErrorBoundary>
+					}
+				/>
+				<Route
+					path="/profile"
+					element={
+						<ErrorBoundary>
+							<Profile />
+						</ErrorBoundary>
+					}
+				/>
+				<Route
+					path="/scholarships/apply"
+					element={
+						<ErrorBoundary>
+							<ScholarshipApply />
+						</ErrorBoundary>
+					}
+				/>
+				<Route
+					path="/admin"
+					element={
+						<ErrorBoundary>
+							<Admin />
+						</ErrorBoundary>
+					}
+				/>
+				<Route
+					path="/treasury"
+					element={
+						<ErrorBoundary>
+							<Treasury />
+						</ErrorBoundary>
+					}
+				/>
+				<Route
+					path="/credentials/:nftId"
+					element={
+						<ErrorBoundary>
+							<Credential />
+						</ErrorBoundary>
+					}
+				/>
 				<Route
 					path="/dashboard"
-					element={<ComingSoon title="My Dashboard" />}
+					element={
+						<ErrorBoundary>
+							<ComingSoon title="My Dashboard" />
+						</ErrorBoundary>
+					}
 				/>
-				<Route path="/debug" element={<Debug />} />
-				<Route path="/debug/:contractName" element={<Debug />} />
-				<Route path="*" element={<NotFound />} />
+				<Route
+					path="/debug"
+					element={
+						<ErrorBoundary>
+							<Debug />
+						</ErrorBoundary>
+					}
+				/>
+				<Route
+					path="/debug/:contractName"
+					element={
+						<ErrorBoundary>
+							<Debug />
+						</ErrorBoundary>
+					}
+				/>
+				<Route
+					path="*"
+					element={
+						<ErrorBoundary>
+							<NotFound />
+						</ErrorBoundary>
+					}
+				/>
 			</Route>
 		</Routes>
 	)
