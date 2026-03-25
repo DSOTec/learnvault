@@ -393,7 +393,8 @@ mod token {
     mod test_token {
         use soroban_sdk::{symbol_short, Address, Env, Symbol};
 
-        const USDC_KEY: Symbol = symbol_short!("USDC");
+        // const TOKEN_KEY: Symbol = symbol_short!("TOK");
+        use super::super::USDC_KEY;
 
         pub fn contract_id(env: &Env) -> Address {
             env.storage()
