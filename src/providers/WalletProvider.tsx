@@ -49,6 +49,7 @@ const POLL_INTERVAL = 1000
 
 export const WalletContext = createContext<WalletContextType>({
 	isPending: true,
+	isReconnecting: true,
 	balances: {},
 	updateBalances: async () => {},
 	signTransaction,
