@@ -1,21 +1,25 @@
-import { lazy, Suspense, type ReactNode } from "react"
+﻿import { lazy, Suspense, type ReactNode } from "react"
 import { Outlet, Route, Routes } from "react-router-dom"
-import ComingSoon from "./components/ComingSoon"
 import ErrorBoundary from "./components/ErrorBoundary"
 import Footer from "./components/Footer"
 import NavBar from "./components/NavBar"
 import NetworkPreconnect from "./components/NetworkPreconnect"
+import { ToastProvider } from "./components/Toast/ToastProvider"
+import { WalletToastWatcher } from "./components/WalletToastWatcher"
 
 const Admin = lazy(() => import("./pages/Admin"))
 const Courses = lazy(() => import("./pages/Courses"))
 const Credential = lazy(() => import("./pages/Credential"))
 const Dao = lazy(() => import("./pages/Dao"))
 const DaoProposals = lazy(() => import("./pages/DaoProposals"))
+const DaoPropose = lazy(() => import("./pages/DaoPropose"))
+const Dashboard = lazy(() => import("./pages/Dashboard"))
 const Debug = lazy(() => import("./pages/Debug"))
 const Donor = lazy(() => import("./pages/Donor"))
 const Home = lazy(() => import("./pages/Home"))
 const Leaderboard = lazy(() => import("./pages/Leaderboard"))
 const Learn = lazy(() => import("./pages/Learn"))
+const LessonView = lazy(() => import("./pages/LessonView"))
 const NotFound = lazy(() => import("./pages/NotFound"))
 const Profile = lazy(() => import("./pages/Profile"))
 const ScholarshipApply = lazy(() => import("./pages/ScholarshipApply"))
@@ -29,35 +33,50 @@ const renderRoute = (element: ReactNode) => (
 
 function App() {
 	return (
-		<Routes>
-			<Route element={<AppLayout />}>
-				<Route path="/" element={renderRoute(<Home />)} />
-				<Route path="/courses" element={renderRoute(<Courses />)} />
-				<Route path="/learn" element={renderRoute(<Learn />)} />
-				<Route path="/dao" element={renderRoute(<Dao />)} />
-				<Route path="/dao/proposals" element={renderRoute(<DaoProposals />)} />
-				<Route path="/leaderboard" element={renderRoute(<Leaderboard />)} />
-				<Route path="/profile" element={renderRoute(<Profile />)} />
-				<Route
-					path="/scholarships/apply"
-					element={renderRoute(<ScholarshipApply />)}
-				/>
-				<Route path="/admin" element={renderRoute(<Admin />)} />
-				<Route path="/treasury" element={renderRoute(<Treasury />)} />
-				<Route
-					path="/credentials/:nftId"
-					element={renderRoute(<Credential />)}
-				/>
-				<Route
-					path="/dashboard"
-					element={renderRoute(<ComingSoon title="My Dashboard" />)}
-				/>
-				<Route path="/debug" element={renderRoute(<Debug />)} />
-				<Route path="/debug/:contractName" element={renderRoute(<Debug />)} />
-				<Route path="/donor" element={renderRoute(<Donor />)} />
-				<Route path="*" element={renderRoute(<NotFound />)} />
-			</Route>
-		</Routes>
+		<ToastProvider>
+			<WalletToastWatcher />
+			<Routes>
+				<Route element={<AppLayout />}>
+					<Route path="/" element={renderRoute(<Home />)} />
+					<Route path="/courses" element={renderRoute(<Courses />)} />
+					<Route
+						path="/courses/:courseId/lessons/:lessonId"
+						element={renderRoute(<LessonView />)}
+					/>
+					<Route path="/learn" element={renderRoute(<Learn />)} />
+					<Route path="/dao" element={renderRoute(<Dao />)} />
+					<Route
+						path="/dao/proposals"
+						element={renderRoute(<DaoProposals />)}
+					/>
+					<Route path="/dao/propose" element={renderRoute(<DaoPropose />)} />
+					<Route path="/leaderboard" element={renderRoute(<Leaderboard />)} />
+					<Route path="/profile" element={renderRoute(<Profile />)} />
+					<Route
+						path="/profile/:walletAddress"
+						element={renderRoute(<Profile />)}
+					/>
+					<Route
+						path="/scholarships/apply"
+						element={renderRoute(<ScholarshipApply />)}
+					/>
+					<Route path="/admin" element={renderRoute(<Admin />)} />
+					<Route path="/treasury" element={renderRoute(<Treasury />)} />
+					<Route path="/donor" element={renderRoute(<Donor />)} />
+					<Route
+						path="/credentials/:nftId"
+						element={renderRoute(<Credential />)}
+					/>
+					<Route path="/dashboard" element={renderRoute(<Dashboard />)} />
+					<Route path="/debug" element={renderRoute(<Debug />)} />
+					<Route
+						path="/debug/:contractName"
+						element={renderRoute(<Debug />)}
+					/>
+					<Route path="*" element={renderRoute(<NotFound />)} />
+				</Route>
+			</Routes>
+		</ToastProvider>
 	)
 }
 
@@ -79,7 +98,7 @@ const RouteFallback = () => (
 )
 
 const AppLayout = () => (
-	<div className="min-h-screen flex flex-col pt-24">
+	<div className="min-h-screen flex flex-col pt-24 overflow-x-hidden w-full max-w-full">
 		<NetworkPreconnect />
 		<NavBar />
 		<main className="flex-1 relative z-10">

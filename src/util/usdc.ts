@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Utility functions for USDC token operations on Stellar
  */
 
@@ -35,31 +35,14 @@ export async function mintTestUSDC(
 	try {
 		const contractId = getUSDCContractId()
 
-		// Get RPC URL from environment
 		const rpcUrl =
 			import.meta.env.PUBLIC_STELLAR_RPC_URL || "http://localhost:8000/rpc"
 
-		// Build the mint transaction
-		// Note: This is a simplified version. In production, you would need to:
-		// 1. Build the transaction properly with the contract client
-		// 2. Sign it with the appropriate authority
-		// 3. Submit it to the network
-		// 4. Wait for confirmation
-
-		// For now, we'll throw an error directing users to use the CLI script
 		throw new Error(
 			`Please use the CLI script to mint test USDC:\n\n` +
 				`./scripts/mint-test-usdc.sh ${recipientAddress} ${amount}\n\n` +
 				`The configured contract ${contractId} will be reachable via ${rpcUrl} once contract clients are generated.`,
 		)
-
-		// TODO: Implement full minting flow once contract clients are available
-		// const result = await contract.call('mint', {
-		//   to: recipientAddress,
-		//   amount: amountStroops
-		// })
-
-		// return result
 	} catch (error) {
 		if (error instanceof Error) {
 			throw error
@@ -79,10 +62,6 @@ export async function getUSDCBalance(_address: string): Promise<number> {
 		getUSDCContractId()
 		const rpcUrl =
 			import.meta.env.PUBLIC_STELLAR_RPC_URL || "http://localhost:8000/rpc"
-
-		// TODO: Implement balance checking once contract clients are available
-		// const balance = await contract.call('balance', { id: address })
-		// return balance / 10000000 // Convert from stroops to USDC
 
 		throw new Error(
 			`Balance checking is not yet implemented. Query the configured RPC endpoint directly: ${rpcUrl}`,
