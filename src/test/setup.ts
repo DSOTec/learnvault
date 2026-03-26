@@ -171,11 +171,10 @@ interface AllTheProvidersProps {
 
 const AllTheProviders = ({
 	children,
-	walletContext,
+	walletContext: _walletContext,
 	queryClient,
 }: AllTheProvidersProps) => {
 	const testQueryClient = queryClient || createTestQueryClient()
-	const mockWalletCtx = walletContext || createMockWalletContext()
 
 	return createElement(
 		QueryClientProvider,

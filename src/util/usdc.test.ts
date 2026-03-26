@@ -35,9 +35,7 @@ const mockSimulate = vi.fn()
 const mockGetAccount = vi.fn()
 
 vi.mock("@stellar/stellar-sdk", async () => {
-	const actual = await vi.importActual<typeof import("@stellar/stellar-sdk")>(
-		"@stellar/stellar-sdk",
-	)
+	const actual = await vi.importActual<any>("@stellar/stellar-sdk")
 	return {
 		...actual,
 		Contract: class {
