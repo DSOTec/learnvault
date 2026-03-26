@@ -1,30 +1,43 @@
-import type { Request, Response } from "express";
+import { type Request, type Response } from "express"
+import { pool } from "../db/index"
 
-const EVENTS = [
-  {
-    id: "evt_1",
-    type: "milestone.completed",
-    entityId: "stellar-basics",
-    timestamp: "2026-03-21T14:02:11.000Z"
-  },
-  {
-    id: "evt_2",
-    type: "validator.approved",
-    entityId: "soroban-fundamentals",
-    timestamp: "2026-03-21T17:45:41.000Z"
-  }
-] as const;
+function parsePositiveInt(value: unknown, fallback: number): number {
+	if (typeof value !== "string") return fallback
+	const parsed = Number.parseInt(value, 10)
+	if (Number.isNaN(parsed) || parsed < 0) return fallback
+	return parsed
+}
 
-export const getEvents = (req: Request, res: Response): void => {
-  const typeFilter = typeof req.query.type === "string" ? req.query.type : undefined;
-  const limit = Number.parseInt(String(req.query.limit ?? "20"), 10);
+export const getEvents = async (req: Request, res: Response): Promise<void> => {
+	const typeFilter =
+		typeof req.query.type === "string" ? req.query.type.trim() : undefined
+	const limit = Math.max(
+		1,
+		Math.min(parsePositiveInt(req.query.limit, 50), 100),
+	)
+	const offset = Math.max(0, parsePositiveInt(req.query.offset, 0))
 
-  const normalizedLimit = Number.isNaN(limit) ? 20 : Math.max(1, Math.min(limit, 100));
-  const filtered = typeFilter
-    ? EVENTS.filter((event) => event.type === typeFilter)
-    : EVENTS;
+	let query = `
+		SELECT id, event_type, data, created_at
+		FROM platform_events
+	`
+	const params: unknown[] = []
 
-  res.status(200).json({
-    data: filtered.slice(0, normalizedLimit)
-  });
-};
+	if (typeFilter) {
+		query += " WHERE event_type = $1"
+		params.push(typeFilter)
+	}
+
+	const limitParam = params.length + 1
+	const offsetParam = params.length + 2
+	query += ` ORDER BY created_at DESC LIMIT $${limitParam} OFFSET $${offsetParam}`
+	params.push(limit, offset)
+
+	try {
+		const result = await pool.query(query, params)
+		res.status(200).json({ data: result.rows })
+	} catch (err) {
+		console.error("[events] Query failed:", err)
+		res.status(500).json({ error: "Failed to fetch events" })
+	}
+}

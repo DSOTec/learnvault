@@ -1,8 +1,8 @@
 #![no_std]
 
 use soroban_sdk::{
-    contract, contracterror, contractimpl, contracttype, panic_with_error, symbol_short, Address, Env,
-    Symbol,
+    Address, Env, String, Symbol, contract, contracterror, contractevent, contractimpl,
+    contracttype, panic_with_error, symbol_short,
 };
 
 const INACTIVITY_WINDOW_SECONDS: u64 = 30 * 24 * 60 * 60;
@@ -47,6 +47,16 @@ pub enum Error {
 #[contract]
 pub struct MilestoneEscrow;
 
+#[contractevent(topics = ["released"])]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct TrancheReleased {
+    #[topic]
+    pub scholar: Address,
+    #[topic]
+    pub proposal_id: u32,
+    pub amount: i128,
+}
+
 #[contractimpl]
 impl MilestoneEscrow {
     pub fn initialize(env: Env, admin: Address, treasury: Address) {
@@ -81,7 +91,7 @@ impl MilestoneEscrow {
             panic_with_error!(&env, Error::EscrowExists);
         }
 
-        xlm::token_client(&env).transfer(&treasury, &env.current_contract_address(), &amount);
+        xlm::token_client(&env).transfer(&treasury, env.current_contract_address(), &amount);
 
         let record = EscrowRecord {
             scholar,
@@ -115,13 +125,18 @@ impl MilestoneEscrow {
         record.last_activity = env.ledger().timestamp();
         env.storage().persistent().set(&key, &record);
 
-        env.events().publish(
-            (symbol_short!("released"), record.scholar, proposal_id),
+        TrancheReleased {
+            scholar: record.scholar.clone(),
+            proposal_id,
             amount,
-        );
+        }
+        .publish(&env);
     }
 
     pub fn reclaim_inactive(env: Env, proposal_id: u32) {
+        let admin = Self::admin(&env);
+        admin.require_auth();
+
         let key = DataKey::Escrow(proposal_id);
         let mut record = Self::get_or_panic(&env, &key);
 
@@ -136,7 +151,11 @@ impl MilestoneEscrow {
             panic_with_error!(&env, Error::NothingToReclaim);
         }
 
-        xlm::token_client(&env).transfer(&env.current_contract_address(), &record.treasury, &unspent);
+        xlm::token_client(&env).transfer(
+            &env.current_contract_address(),
+            &record.treasury,
+            &unspent,
+        );
 
         record.released_amount = record.total_amount;
         record.last_activity = now;
@@ -186,12 +205,16 @@ impl MilestoneEscrow {
             panic_with_error!(env, Error::NotInitialized);
         }
     }
+
+    pub fn get_version(env: Env) -> String {
+        String::from_str(&env, "1.0.0")
+    }
 }
 
 mod xlm {
     #[cfg(test)]
     mod test_xlm {
-        use soroban_sdk::{symbol_short, Address, Env, Symbol};
+        use soroban_sdk::{Address, Env, Symbol, symbol_short};
 
         const XLM_KEY: Symbol = symbol_short!("XLM");
 
@@ -213,7 +236,18 @@ mod xlm {
     }
 
     #[cfg(not(test))]
-    stellar_registry::import_asset!("xlm");
+    mod live_xlm {
+        use soroban_sdk::Env;
+
+        stellar_registry::import_asset!("xlm");
+
+        pub fn token_client<'a>(env: &Env) -> soroban_sdk::token::TokenClient<'a> {
+            xlm::token_client(env)
+        }
+    }
+
+    #[cfg(not(test))]
+    pub use live_xlm::*;
 
     #[cfg(test)]
     pub use test_xlm::*;
