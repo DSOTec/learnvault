@@ -1,11 +1,11 @@
-import path from "node:path";
+import path from "node:path"
 
-import swaggerJSDoc from "swagger-jsdoc";
+import swaggerJSDoc from "swagger-jsdoc"
 
 export const buildOpenApiSpec = () => {
-  const sourceGlob = path.resolve(__dirname, "./routes/*.ts");
-  const transpiledGlob = path.resolve(__dirname, "./routes/*.js");
-  const rootSourceGlob = path.resolve(__dirname, "../src/routes/*.ts");
+	const sourceGlob = path.resolve(__dirname, "./routes/*.ts")
+	const transpiledGlob = path.resolve(__dirname, "./routes/*.js")
+	const rootSourceGlob = path.resolve(__dirname, "../src/routes/*.ts")
 
   return swaggerJSDoc({
     definition: {
@@ -25,7 +25,8 @@ export const buildOpenApiSpec = () => {
         { name: "Health", description: "Server status endpoints" },
         { name: "Courses", description: "Course catalog endpoints" },
         { name: "Validator", description: "Milestone validation endpoints" },
-        { name: "Events", description: "Event stream endpoints" }
+        { name: "Events", description: "Event stream endpoints" },
+        { name: "Leaderboard", description: "Learner ranking endpoints" }
       ],
       components: {
         securitySchemes: {

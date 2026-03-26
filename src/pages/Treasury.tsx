@@ -28,16 +28,28 @@ const Treasury: React.FC = () => {
 		donorsCount: "842",
 	}
 
+	const siteUrl = "https://learnvault.app"
+	const title = `Treasury - ${stats.totalTreasury} - ${stats.scholarsFunded} Scholars Funded - LearnVault`
+	const description = `LearnVault's decentralized scholarship treasury holds ${stats.totalTreasury} and has funded ${stats.scholarsFunded} scholars. View real-time inflows and disbursements.`
+
 	return (
 		<div className="p-12 max-w-7xl mx-auto min-h-screen text-white animate-in fade-in duration-1000">
+			<Helmet>
+				<title>{title}</title>
+				<meta property="og:title" content={title} />
+				<meta property="og:description" content={description} />
+				<meta property="og:image" content={`${siteUrl}/og-image.png`} />
+				<meta property="og:url" content={`${siteUrl}/treasury`} />
+				<meta name="twitter:card" content="summary_large_image" />
+			</Helmet>
+
 			<header className="text-center mb-20 relative">
 				<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-brand-cyan/20 blur-[100px] rounded-full -z-10" />
 				<h1 className="text-7xl font-black mb-4 tracking-tighter text-gradient">
 					Treasury Dashboard
 				</h1>
 				<p className="text-white/40 text-lg max-w-2xl mx-auto font-medium">
-					Real-time transparency into the LearnVault decentralized scholarship
-					fund.
+					Real-time transparency into the LearnVault decentralized scholarship fund.
 				</p>
 			</header>
 
@@ -45,25 +57,25 @@ const Treasury: React.FC = () => {
 				<StatCard
 					label="Total in Treasury"
 					value={stats.totalTreasury}
-					icon="💰"
+					icon={"\u{1F4B0}"}
 					color="text-brand-cyan"
 				/>
 				<StatCard
 					label="Total Disbursed"
 					value={stats.totalDisbursed}
-					icon="💸"
+					icon={"\u{1F4B8}"}
 					color="text-brand-purple"
 				/>
 				<StatCard
 					label="Scholars Funded"
 					value={stats.scholarsFunded}
-					icon="🎓"
+					icon={"\u{1F393}"}
 					color="text-brand-emerald"
 				/>
 				<StatCard
 					label="Global Donors"
 					value={stats.donorsCount}
-					icon="🌍"
+					icon={"\u{1F30D}"}
 					color="text-brand-blue"
 				/>
 			</div>
@@ -83,78 +95,22 @@ const Treasury: React.FC = () => {
 						</div>
 					</div>
 					<div className="w-full h-[400px]">
-						<ResponsiveContainer>
-							<AreaChart
-								data={data}
-								margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
-							>
-								<defs>
-									<linearGradient id="colorIn" x1="0" y1="0" x2="0" y2="1">
-										<stop offset="5%" stopColor="#00d2ff" stopOpacity={0.3} />
-										<stop offset="95%" stopColor="#00d2ff" stopOpacity={0} />
-									</linearGradient>
-									<linearGradient id="colorOut" x1="0" y1="0" x2="0" y2="1">
-										<stop offset="5%" stopColor="#8e2de2" stopOpacity={0.3} />
-										<stop offset="95%" stopColor="#8e2de2" stopOpacity={0} />
-									</linearGradient>
-								</defs>
-								<CartesianGrid
-									strokeDasharray="3 3"
-									stroke="rgba(255,255,255,0.05)"
-									vertical={false}
-								/>
-								<XAxis
-									dataKey="name"
-									stroke="rgba(255,255,255,0.2)"
-									fontSize={12}
-									tickLine={false}
-									axisLine={false}
-								/>
-								<YAxis
-									stroke="rgba(255,255,255,0.2)"
-									fontSize={12}
-									tickLine={false}
-									axisLine={false}
-									tickFormatter={(val) => `$${val / 1000}k`}
-								/>
-								<Tooltip
-									contentStyle={{
-										backgroundColor: "rgba(5, 7, 10, 0.9)",
-										borderRadius: "16px",
-										border: "1px solid rgba(255,255,255,0.1)",
-										backdropFilter: "blur(10px)",
-										boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
-									}}
-									itemStyle={{
-										color: "#fff",
-										fontSize: "12px",
-										fontWeight: "bold",
-									}}
-								/>
-								<Area
-									type="monotone"
-									dataKey="inflows"
-									stroke="#00d2ff"
-									strokeWidth={3}
-									fillOpacity={1}
-									fill="url(#colorIn)"
-								/>
-								<Area
-									type="monotone"
-									dataKey="outflows"
-									stroke="#8e2de2"
-									strokeWidth={3}
-									fillOpacity={1}
-									fill="url(#colorOut)"
-								/>
-							</AreaChart>
-						</ResponsiveContainer>
+						<Suspense
+							fallback={
+								<div className="h-full animate-pulse rounded-[2rem] border border-white/5 bg-white/5" />
+							}
+						>
+							<TreasuryHealthChart data={data} />
+						</Suspense>
 					</div>
 				</div>
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 				<ActivityFeed
+					address={undefined}
+					limit={5}
+					filter="deposit"
 					title="Recent Community Deposits"
 					items={[
 						{
@@ -176,6 +132,9 @@ const Treasury: React.FC = () => {
 					]}
 				/>
 				<ActivityFeed
+					address={undefined}
+					limit={5}
+					filter="disburse"
 					title="Latest Disbursements"
 					items={[
 						{
@@ -213,7 +172,7 @@ const StatCard: React.FC<{
 	icon: string
 	color: string
 }> = ({ label, value, icon, color }) => (
-	<div className="glass-card p-8 rounded-[2rem] hover:border-white/20 transition-all hover:-translate-y-2 group">
+	<div className="glass-card p-8 rounded-4xl hover:border-white/20 transition-all hover:-translate-y-2 group">
 		<div className="text-3xl mb-4 group-hover:scale-125 transition-transform duration-500">
 			{icon}
 		</div>
