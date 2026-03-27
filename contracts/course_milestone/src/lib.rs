@@ -2,8 +2,8 @@
 #![allow(deprecated)]
 
 use soroban_sdk::{
-    Address, Env, String, Symbol, Vec, contract, contracterror, contractimpl, contracttype,
-    panic_with_error, symbol_short,
+    Address, Env, String, Symbol, Vec, contract, contracterror, contractevent, contractimpl,
+    contracttype, panic_with_error, symbol_short,
 };
 
 #[contracttype]
@@ -38,6 +38,13 @@ pub struct SubmittedEventData {
     pub evidence_uri: String,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+#[contracttype]
+pub struct EnrolledEventData {
+    pub learner: Address,
+    pub course_id: String,
+}
+
 const ADMIN_KEY: Symbol = symbol_short!("ADMIN");
 const LEARN_TOKEN_KEY: Symbol = symbol_short!("LRN_TKN");
 
@@ -53,6 +60,9 @@ pub enum Error {
     CourseAlreadyComplete = 6,
     InvalidMilestones = 7,
     CourseAlreadyExists = 8,
+    AlreadyEnrolled = 9,
+    NotEnrolled = 10,
+    DuplicateSubmission = 11,
 }
 
 #[contractevent]
@@ -221,8 +231,6 @@ impl CourseMilestone {
         }
     }
 }
-
-pub use learn_token_client::LearnTokenClient;
 
 #[cfg(test)]
 mod test;
