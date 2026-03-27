@@ -35,8 +35,8 @@ import { createUploadRouter } from "./routes/upload.routes"
 import { validatorRouter } from "./routes/validator.routes"
 import { createAuthService } from "./services/auth.service"
 import {
-    createJwtService,
-    generateEphemeralDevJwtKeys,
+	createJwtService,
+	generateEphemeralDevJwtKeys,
 } from "./services/jwt.service"
 
 const pemString = z
