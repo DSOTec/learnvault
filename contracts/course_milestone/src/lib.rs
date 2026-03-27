@@ -46,8 +46,7 @@ pub struct EnrolledEventData {
 }
 
 const ADMIN_KEY: Symbol = symbol_short!("ADMIN");
-const LEARN_TOKEN_KEY: Symbol = symbol_short!("LRN_TKN");
-const PAUSED_KEY: Symbol = symbol_short!("PAUSED"); // ✅ NEW
+const PAUSED_KEY: Symbol = symbol_short!("PAUSED");
 
 #[contracterror]
 #[derive(Clone, Copy, Debug, Eq, PartialEq, PartialOrd, Ord)]
@@ -64,6 +63,7 @@ pub enum Error {
     AlreadyEnrolled = 9,
     NotEnrolled = 10,
     DuplicateSubmission = 11,
+    ContractPaused = 12,
 }
 
 #[contractevent]
@@ -92,7 +92,7 @@ pub struct CourseMilestone;
 
 #[contractimpl]
 impl CourseMilestone {
-    pub fn initialize(env: Env, admin: Address, learn_token_contract: Address) {
+    pub fn initialize(env: Env, admin: Address) {
         if env.storage().instance().has(&ADMIN_KEY) {
             panic_with_error!(&env, Error::AlreadyInitialized);
         }
@@ -136,7 +136,7 @@ impl CourseMilestone {
 
     pub fn enroll(env: Env, learner: Address, course_id: String) {
         if Self::is_paused(env.clone()) {
-            panic!("Contract is paused");
+            panic_with_error!(&env, Error::ContractPaused);
         }
 
         Self::require_initialized(&env);
@@ -160,7 +160,11 @@ impl CourseMilestone {
 
         env.events().publish(
             (symbol_short!("enrolled"),),
-            SubmittedEventData { learner, course_id, evidence_uri: String::from_str(&env, "") },
+            SubmittedEventData {
+                learner,
+                course_id,
+                evidence_uri: String::from_str(&env, ""),
+            },
         );
     }
 
@@ -177,14 +181,14 @@ impl CourseMilestone {
         evidence_uri: String,
     ) {
         if Self::is_paused(env.clone()) {
-            panic!("Contract is paused");
+            panic_with_error!(&env, Error::ContractPaused);
         }
 
         Self::require_initialized(&env);
         learner.require_auth();
 
         if !Self::is_enrolled(env.clone(), learner.clone(), course_id.clone()) {
-            panic_with_error!(&env, Error::Unauthorized);
+            panic_with_error!(&env, Error::NotEnrolled);
         }
 
         let state_key = DataKey::MilestoneState(learner.clone(), course_id.clone(), milestone_id);
@@ -195,7 +199,7 @@ impl CourseMilestone {
             .unwrap_or(MilestoneStatus::NotStarted);
 
         if current_state != MilestoneStatus::NotStarted {
-            panic_with_error!(&env, Error::Unauthorized);
+            panic_with_error!(&env, Error::DuplicateSubmission);
         }
 
         let submission = MilestoneSubmission {
@@ -232,6 +236,15 @@ impl CourseMilestone {
             .persistent()
             .get(&key)
             .unwrap_or(MilestoneStatus::NotStarted)
+    }
+
+    pub fn get_milestone_status(
+        env: Env,
+        learner: Address,
+        course_id: String,
+        milestone_id: u32,
+    ) -> MilestoneStatus {
+        Self::get_milestone_state(env, learner, course_id, milestone_id)
     }
 
     pub fn get_milestone_submission(
