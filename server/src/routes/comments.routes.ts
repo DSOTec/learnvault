@@ -23,10 +23,12 @@ export const commentsRouter = Router()
  */
 commentsRouter.get("/proposals/:proposalId/comments", async (req, res) => {
 	const { proposalId } = req.params
+	const limit = Math.min(parseInt(req.query.limit as string) || 50, 100)
+	const offset = Math.max(parseInt(req.query.offset as string) || 0, 0)
 	try {
 		const result = await pool.query(
-			`SELECT * FROM comments WHERE proposal_id = $1 AND deleted_at IS NULL ORDER BY is_pinned DESC, created_at ASC`,
-			[proposalId],
+			`SELECT * FROM comments WHERE proposal_id = $1 AND deleted_at IS NULL ORDER BY is_pinned DESC, created_at ASC LIMIT $2 OFFSET $3`,
+			[proposalId, limit, offset],
 		)
 		res.json(result.rows)
 	} catch (err) {
@@ -251,7 +253,7 @@ commentsRouter.put(
 			// I'll need a way to verify this.
 
 			const commentRes = await pool.query(
-				`SELECT proposal_id FROM comments WHERE id = $1`,
+				`SELECT proposal_id FROM comments WHERE id = $1 AND deleted_at IS NULL`,
 				[id],
 			)
 			if (commentRes.rowCount === 0)
