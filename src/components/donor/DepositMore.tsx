@@ -1,4 +1,5 @@
 import React, { useState } from "react"
+import { useContractIds } from "../../hooks/useContractIds"
 import { useWallet } from "../../hooks/useWallet"
 import {
 	explorerTransactionUrl,
@@ -47,13 +48,13 @@ export const DepositMore: React.FC<DepositMoreProps> = ({
 			return
 		}
 
-		if (!signTransaction) {
-			showError("Wallet does not support signing")
+		if (!scholarshipTreasury) {
+			showError("Scholarship treasury is not available on this network")
 			return
 		}
 
-		if (!SCHOLARSHIP_TREASURY_CONTRACT_ID) {
-			showError("Scholarship treasury contract is not configured")
+		if (!signTransaction) {
+			showError("Wallet does not support signing")
 			return
 		}
 
@@ -70,11 +71,29 @@ export const DepositMore: React.FC<DepositMoreProps> = ({
 			await updateBalances()
 			showSuccess(
 				`Deposit of ${formatUsdcAmount(amount)} submitted. Tx: ${txHash.slice(0, 8)}...`,
+			const depositAmount = parseFloat(amount)
+			const contract = createScholarshipTreasuryContract(
+				scholarshipTreasury,
+				address,
+			)
+
+			showInfo("Waiting for wallet approval...")
+			const txHash = await contract.deposit(
+				address,
+				depositAmount,
+				signTransaction,
+			)
+
+			showSuccess(
+				`Deposit of $${depositAmount.toLocaleString()} USDC submitted!`,
+				txHash || undefined,
 			)
 			setAmount("")
-
-			if (onDepositSuccess) {
-				onDepositSuccess()
+			onDepositSuccess?.()
+		} catch (error) {
+			if (isUserRejection(error)) {
+				showInfo("Deposit cancelled")
+				return
 			}
 		} catch (error) {
 			const message =
@@ -82,6 +101,13 @@ export const DepositMore: React.FC<DepositMoreProps> = ({
 					? error.message
 					: "Failed to process deposit. Please try again."
 			showError(message)
+
+			const appError = parseError(error)
+			showError(
+				appError.message && appError.message !== "An unexpected error occurred"
+					? appError.message
+					: "Failed to process deposit. Please try again.",
+			)
 		} finally {
 			setIsLoading(false)
 		}
@@ -195,6 +221,10 @@ export const DepositMore: React.FC<DepositMoreProps> = ({
 						Deposits are secured on the Stellar blockchain
 						<br />
 						You&apos;ll receive governance tokens immediately
+					<p className="text-[10px] text-white/30 text-center mt-6">
+						Deposits are secured on the Stellar blockchain
+						<br />
+						You will receive governance tokens immediately
 						<br />
 						Your funds support eligible scholar proposals
 					</p>
