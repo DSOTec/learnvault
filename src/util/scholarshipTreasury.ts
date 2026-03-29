@@ -1,5 +1,6 @@
 import { rpcUrl, networkPassphrase } from "../contracts/util"
 import { useWallet } from "../hooks/useWallet"
+import { logger } from "../utils/logger"
 
 export interface ScholarshipTreasuryContract {
 	createProposal: (
@@ -43,9 +44,9 @@ export class ScholarshipTreasury implements ScholarshipTreasuryContract {
 		try {
 			const mockTxHash = `PROPOSAL_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`
 
-			console.log("Creating proposal with params:", params)
-			console.log("Contract ID:", this.contractId)
-			console.log("Submitting from address:", this.address)
+			logger.debug("Creating proposal with params:", params)
+			logger.debug("Contract ID:", this.contractId)
+			logger.debug("Submitting from address:", this.address)
 
 			// Simulate contract call delay
 			await new Promise((resolve) => setTimeout(resolve, 1500))
