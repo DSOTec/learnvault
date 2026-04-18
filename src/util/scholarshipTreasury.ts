@@ -1,4 +1,3 @@
-import { type KitActions } from "@creit.tech/stellar-wallets-kit"
 import {
 	BASE_FEE,
 	Contract,
@@ -16,7 +15,12 @@ import {
 
 type AnyRecord = Record<string, unknown>
 
-type WalletSignTransaction = KitActions["signTransaction"] | undefined
+type WalletSignTransaction =
+	| ((
+			xdr: string,
+			opts?: { networkPassphrase?: string; address?: string; path?: string },
+	  ) => Promise<{ signedTxXdr: string; signerAddress?: string }>)
+	| undefined
 
 export interface ScholarshipTreasuryContract {
 	createProposal: (

@@ -6,7 +6,7 @@ import {
 	resolveTheme,
 	persistTheme,
 	applyTheme,
-} from "@/util/theme"
+} from "../util/theme"
 
 export const useTheme = () => {
 	// Initialize with system/stored preference

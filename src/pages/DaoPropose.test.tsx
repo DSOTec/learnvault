@@ -56,12 +56,12 @@ describe("DaoPropose", () => {
 		vi.clearAllMocks()
 		mockUseWallet.mockReturnValue({
 			address: "GDGQVOKHW4VEJRU2TETD6DBRKEO5ERCNF353LW5JBFUKJQ2K5RQDDXYZ",
-		} as ReturnType<typeof useWallet>)
+		} as unknown as ReturnType<typeof useWallet>)
 		mockUseProposals.mockReturnValue({
 			createProposal: vi.fn(),
 			isSubmittingProposal: false,
 			votingPower: 100n,
-		} as ReturnType<typeof useProposals>)
+		} as unknown as ReturnType<typeof useProposals>)
 		mockUseToast.mockReturnValue({
 			showSuccess: vi.fn(),
 			showError: vi.fn(),
@@ -87,7 +87,7 @@ describe("DaoPropose", () => {
 	it("shows wallet connection prompt when wallet is not connected", async () => {
 		mockUseWallet.mockReturnValue({
 			address: null,
-		} as ReturnType<typeof useWallet>)
+		} as unknown as ReturnType<typeof useWallet>)
 		render(<DaoPropose />, { wrapper: createWrapper() })
 		expect(screen.getByText("Connect Your Wallet")).toBeInTheDocument()
 	})
@@ -97,7 +97,7 @@ describe("DaoPropose", () => {
 			createProposal: vi.fn(),
 			isSubmittingProposal: false,
 			votingPower: 5n,
-		} as ReturnType<typeof useProposals>)
+		} as unknown as ReturnType<typeof useProposals>)
 		render(<DaoPropose />, { wrapper: createWrapper() })
 		expect(
 			screen.getByText("Insufficient Governance Tokens"),
@@ -192,7 +192,7 @@ describe("DaoPropose", () => {
 			createProposal: vi.fn(() => new Promise(() => {})),
 			isSubmittingProposal: true,
 			votingPower: 100n,
-		} as ReturnType<typeof useProposals>)
+		} as unknown as ReturnType<typeof useProposals>)
 
 		render(<DaoPropose />, { wrapper: createWrapper() })
 
@@ -212,7 +212,7 @@ describe("DaoPropose", () => {
 			createProposal: mockCreateProposal,
 			isSubmittingProposal: false,
 			votingPower: 100n,
-		} as ReturnType<typeof useProposals>)
+		} as unknown as ReturnType<typeof useProposals>)
 
 		render(<DaoPropose />, { wrapper: createWrapper() })
 
@@ -246,7 +246,7 @@ describe("DaoPropose", () => {
 			createProposal: mockCreateProposal,
 			isSubmittingProposal: false,
 			votingPower: 100n,
-		} as ReturnType<typeof useProposals>)
+		} as unknown as ReturnType<typeof useProposals>)
 
 		render(<DaoPropose />, { wrapper: createWrapper() })
 
@@ -282,7 +282,7 @@ describe("DaoPropose", () => {
 			createProposal: mockCreateProposal,
 			isSubmittingProposal: false,
 			votingPower: 100n,
-		} as ReturnType<typeof useProposals>)
+		} as unknown as ReturnType<typeof useProposals>)
 
 		render(<DaoPropose />, { wrapper: createWrapper() })
 
@@ -323,7 +323,7 @@ describe("DaoPropose", () => {
 			createProposal: mockCreateProposal,
 			isSubmittingProposal: false,
 			votingPower: 100n,
-		} as ReturnType<typeof useProposals>)
+		} as unknown as ReturnType<typeof useProposals>)
 
 		mockUseToast.mockReturnValue({
 			showSuccess: vi.fn(),
