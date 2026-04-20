@@ -17,9 +17,6 @@ version = "23.1.0"
 path = "contracts/shared"
 
 [workspace.dependencies.proptest]
-version = "1.0"
-
-[workspace.dependencies.proptest]
 version = "1.5"
 
 [profile.release]
