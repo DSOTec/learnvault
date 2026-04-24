@@ -5,6 +5,7 @@ import {
 	DashboardStatsSkeleton,
 } from "../components/SkeletonLoader"
 import { ErrorState } from "../components/states/errorState"
+import { useToast } from "../components/Toast/ToastProvider"
 import TreasuryHealthChart, {
 	type TreasuryPoint,
 } from "../components/treasury/TreasuryHealthChart"
@@ -13,7 +14,6 @@ import { useContractIds } from "../hooks/useContractIds"
 import { useTreasury } from "../hooks/useTreasury"
 import { useUSDC } from "../hooks/useUSDC"
 import { useWallet } from "../hooks/useWallet"
-import { useToast } from "../components/Toast/ToastProvider"
 import { connectWallet } from "../util/wallet"
 
 const API_BASE = import.meta.env.VITE_SERVER_URL || "http://localhost:4000"
@@ -224,8 +224,12 @@ const Treasury: React.FC = () => {
 			{isLoading ? (
 				<DashboardStatsSkeleton />
 			) : isError ? (
-				<div className="glass-card p-8 rounded-[3rem] border border-white/5 text-center text-red-400">
-					Failed to load treasury stats.
+				<div className="glass-card p-8 rounded-[3rem] border border-white/5">
+					<ErrorState
+						message="Failed to load treasury stats. The data service may be temporarily unavailable."
+						onRetry={() => void refetch()}
+						showContactSupport
+					/>
 				</div>
 			) : (
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
