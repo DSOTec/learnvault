@@ -4,10 +4,18 @@ import { useParams } from "react-router-dom"
 import LessonContent from "../components/LessonContent"
 import LessonSidebar from "../components/LessonSidebar"
 import MilestoneSubmitPanel from "../components/MilestoneSubmitPanel"
+import { CourseForum } from "../components/forum/CourseForum"
 import { LessonListSkeleton } from "../components/skeletons/LessonListSkeleton"
 import { useCourse } from "../hooks/useCourse"
 import { useCourseDetail } from "../hooks/useCourses"
 import { useWallet } from "../hooks/useWallet"
+import {
+	completeLessonSession,
+	formatDuration,
+	getLessonTime,
+	startLessonSession,
+	stopLessonSession,
+} from "../util/learningTime"
 import { connectWallet } from "../util/wallet"
 import NotFound from "./NotFound"
 
@@ -18,6 +26,7 @@ const loadingLesson = {
 	content: "",
 	order: 0,
 	isMilestone: false,
+	estimatedMinutes: 0,
 }
 
 const LessonView: React.FC = () => {
@@ -38,6 +47,31 @@ const LessonView: React.FC = () => {
 
 	const [isLoadingContent, setIsLoadingContent] = useState(true)
 	const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+	const [timeSpentLabel, setTimeSpentLabel] = useState<string | null>(null)
+	
+	const searchParams = new URL(window.location.href).searchParams
+	const currentTab = searchParams.get("tab") || "lesson"
+	const setTab = (tab: string) => {
+		const newUrl = new URL(window.location.href)
+		if (tab === "lesson") newUrl.searchParams.delete("tab")
+		else newUrl.searchParams.set("tab", tab)
+		window.history.pushState({}, "", newUrl)
+		window.dispatchEvent(new Event("popstate"))
+	}
+	
+	// Re-render when url changes
+    const [, forceUpdate] = React.useReducer((x) => x + 1, 0)
+    useEffect(() => {
+        const handlePopState = () => forceUpdate()
+        window.addEventListener("popstate", handlePopState)
+        return () => window.removeEventListener("popstate", handlePopState)
+    }, [])
+
+	const lesson = useMemo(
+		() => course?.lessons.find((candidate) => candidate.id === lessonId),
+		[course, lessonId],
+	)
+	const allLessons = useMemo(() => course?.lessons ?? [], [course])
 
 	useEffect(() => {
 		// Simulate a short content load delay
@@ -47,14 +81,25 @@ const LessonView: React.FC = () => {
 	}, [lessonId])
 
 	useEffect(() => {
+		if (!course || !lesson) return
+
+		startLessonSession(course.slug, lesson.id, lesson.estimatedMinutes)
+		const existing = getLessonTime(course.slug, lesson.id)
+		setTimeSpentLabel(
+			existing ? formatDuration(existing.secondsSpent) : formatDuration(0),
+		)
+
+		return () => {
+			const stopped = stopLessonSession(course.slug, lesson.id)
+			if (stopped) {
+				setTimeSpentLabel(formatDuration(stopped.lesson.secondsSpent))
+			}
+		}
+	}, [course, lesson])
+
+	useEffect(() => {
 		setIsSidebarOpen(false)
 	}, [lessonId])
-
-	const lesson = useMemo(
-		() => course?.lessons.find((candidate) => candidate.id === lessonId),
-		[course, lessonId],
-	)
-	const allLessons = useMemo(() => course?.lessons ?? [], [course])
 
 	if (!isLoadingCourse && (courseError || !course || !lesson)) {
 		return <NotFound />
@@ -159,23 +204,54 @@ const LessonView: React.FC = () => {
 
 	const isNextLocked = !isCompleted
 
-	const handleMarkComplete = () => {
-		void completeMilestone(courseId ?? "", lessonId)
+	const handleMarkComplete = async () => {
+		if (!courseId || !course || !lesson) return
+
+		const completedOnChain = await completeMilestone(courseId, lessonId)
+		if (completedOnChain) {
+			const completed = completeLessonSession(
+				course.slug,
+				lesson.id,
+				lesson.estimatedMinutes,
+			)
+			setTimeSpentLabel(formatDuration(completed.secondsSpent))
+		}
 	}
 
 	return (
 		<div className="container mx-auto px-4 py-8 lg:py-12 max-w-7xl animate-in fade-in slide-in-from-bottom-8 duration-700">
-			<header className="mb-8 md:mb-12">
+			<header className="mb-4 md:mb-6">
 				<div className="flex items-center gap-3 mb-4">
 					<span className="px-3 py-1 rounded-full text-xs font-semibold bg-brand-blue/20 text-brand-cyan border border-brand-cyan/20">
 						{course.track}
 					</span>
 					<span className="text-white/40 text-sm">{course.title}</span>
 				</div>
-				<h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-					{lesson.title}
-				</h1>
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+				    <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+					    {currentTab === "forum" ? "Community Forum" : lesson.title}
+				    </h1>
+                </div>
 			</header>
+
+            <div className="flex gap-4 mb-8 border-b border-white/10">
+                <button
+                    onClick={() => setTab("lesson")}
+                    className={`pb-3 px-2 text-sm font-bold uppercase tracking-widest transition-colors ${
+                        currentTab === "lesson" ? "text-brand-cyan border-b-2 border-brand-cyan" : "text-white/40 hover:text-white/70"
+                    }`}
+                >
+                    Lesson
+                </button>
+                <button
+                    onClick={() => setTab("forum")}
+                    className={`pb-3 px-2 text-sm font-bold uppercase tracking-widest transition-colors ${
+                        currentTab === "forum" ? "text-brand-cyan border-b-2 border-brand-cyan" : "text-white/40 hover:text-white/70"
+                    }`}
+                >
+                    Forum
+                </button>
+            </div>
 
 			<div className="lg:hidden mb-6">
 				<button
@@ -244,24 +320,33 @@ const LessonView: React.FC = () => {
 				</div>
 
 				<div>
-					<LessonContent
-						lesson={lesson ?? loadingLesson}
-						isLoading={isLoadingCourse || isLoadingContent}
-						isCompleted={isCompleted}
-						isCompleting={isCompletingMilestone}
-						onMarkComplete={handleMarkComplete}
-						prevLessonId={prevLessonId}
-						nextLessonId={nextLessonId}
-						isNextLocked={isNextLocked}
-					/>
-
-					{lesson?.isMilestone && !isLoadingCourse && !isLoadingContent && (
-						<div className="mt-12 animate-in fade-in slide-in-from-top-4 duration-1000">
-							<MilestoneSubmitPanel
-								courseId={course.slug}
-								milestoneId={lesson.id}
-							/>
+					{currentTab === "forum" ? (
+						<div className="animate-in fade-in">
+							<CourseForum courseId={course.slug} />
 						</div>
+					) : (
+						<>
+							<LessonContent
+								lesson={lesson ?? loadingLesson}
+								isLoading={isLoadingCourse || isLoadingContent}
+								isCompleted={isCompleted}
+								isCompleting={isCompletingMilestone}
+								timeSpentLabel={timeSpentLabel}
+								onMarkComplete={handleMarkComplete}
+								prevLessonId={prevLessonId}
+								nextLessonId={nextLessonId}
+								isNextLocked={isNextLocked}
+							/>
+
+							{lesson?.isMilestone && !isLoadingCourse && !isLoadingContent && (
+								<div className="mt-12 animate-in fade-in slide-in-from-top-4 duration-1000">
+									<MilestoneSubmitPanel
+										courseId={course.slug}
+										milestoneId={lesson.id}
+									/>
+								</div>
+							)}
+						</>
 					)}
 				</div>
 			</div>
