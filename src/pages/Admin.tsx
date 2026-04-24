@@ -84,6 +84,7 @@ const sectionDescriptions: Record<AdminSection, string> = {
 	courses: "Live course records from the backend course catalog.",
 	milestones: "Review milestone reports and approvals.",
 	users: "Lookup learner profiles by wallet address.",
+	wiki: "Create and edit platform documentation and guides.",
 	treasury: "Monitor and manage treasury controls.",
 	scholarships: "View scholarship program health metrics.",
 	contracts: "Inspect deployed on-chain contract records.",
@@ -109,6 +110,186 @@ const contractRecords: ContractRecord[] = [
 	},
 ]
 
+const STATUSES = ["pending", "approved", "rejected"] as const
+
+const formatDate = (value: string | undefined): string => {
+	if (!value) return "—"
+
+	const date = new Date(value)
+	if (Number.isNaN(date.getTime())) return value
+
+	return date.toLocaleDateString("en-GB", {
+		day: "2-digit",
+		month: "short",
+		year: "numeric",
+	})
+}
+
+const formatCount = (value: number): string =>
+	value.toLocaleString("en-US", { maximumFractionDigits: 0 })
+
+const renderAddress = (value: string | undefined) =>
+	value ? shortenContractId(value, 6, 6) : "Not available"
+
+const mapAdminCourse = (course: ApiCourse): AdminCourse => ({
+	id: String(course.id),
+	slug: course.slug || String(course.id),
+	title: course.title || "Untitled Course",
+	status: course.published ? "published" : "draft",
+	students: Number(course.studentsCount ?? course.students_count ?? 0),
+	track: course.track || "General",
+	difficulty: course.difficulty || "beginner",
+})
+
+function useAdminCoursesList() {
+	return useQuery({
+		queryKey: ["admin", "courses"],
+		queryFn: async (): Promise<AdminCourse[]> => {
+			const response = await apiFetchJson<CourseListResponse | ApiCourse[]>(
+				"/api/courses?includeUnpublished=true&limit=100",
+				{
+					auth: true,
+				},
+			)
+			const courses = Array.isArray(response) ? response : (response.data ?? [])
+			return courses.map(mapAdminCourse)
+		},
+		staleTime: 60 * 1000,
+	})
+}
+
+const ConfirmDialog: React.FC<{
+	action: "approve" | "reject"
+	milestone: MilestoneSubmission
+	onConfirm: () => void
+	onCancel: () => void
+}> = ({ action, milestone, onConfirm, onCancel }) => (
+	<div
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="dialog-title"
+		className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+	>
+		<div className="glass border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+			<h2 id="dialog-title" className="text-lg font-semibold text-white mb-2">
+				{action === "approve" ? "Approve Milestone" : "Reject Milestone"}
+			</h2>
+			<p className="text-sm text-white/60 mb-1">
+				Learner:{" "}
+				<span className="font-mono text-white/90">
+					<AddressDisplay address={milestone.learnerAddress} showExplorerLink={false} />
+				</span>
+			</p>
+			<p className="text-sm text-white/60 mb-4">
+				Course: <span className="text-white/90">{milestone.course}</span>
+			</p>
+			<p className="text-sm text-white/60 mb-6">
+				Are you sure you want to{" "}
+				<strong
+					className={action === "approve" ? "text-emerald-400" : "text-red-400"}
+				>
+					{action}
+				</strong>{" "}
+				this submission?
+			</p>
+			<div className="flex gap-3 justify-end">
+				<button
+					type="button"
+					onClick={onCancel}
+					className="px-4 py-2 text-sm rounded-xl border border-white/10 text-white/60 hover:text-white transition-colors"
+				>
+					Cancel
+				</button>
+				<button
+					type="button"
+					onClick={onConfirm}
+					className={`px-4 py-2 text-sm rounded-xl font-medium transition-colors ${
+						action === "approve"
+							? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30"
+							: "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
+					}`}
+				>
+					Confirm {action === "approve" ? "Approval" : "Rejection"}
+				</button>
+			</div>
+		</div>
+	</div>
+)
+
+const MilestoneStatsBar: React.FC = () => {
+	const { stats, loading, error, fetchStats } = useAdminStats()
+
+	useEffect(() => {
+		void fetchStats()
+	}, [fetchStats])
+
+	const items = [
+		{
+			label: "Pending",
+			value: stats?.pendingMilestones ?? "—",
+			color: "text-yellow-400",
+		},
+		{
+			label: "Approved Today",
+			value: stats?.approvedToday ?? "—",
+			color: "text-emerald-400",
+		},
+		{
+			label: "Rejected Today",
+			value: stats?.rejectedToday ?? "—",
+			color: "text-red-400",
+		},
+	]
+
+	return (
+		<div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+			{error && (
+				<p className="md:col-span-3 text-xs text-red-400">
+					Could not load stats — {error}. Refresh the page to try again.
+				</p>
+			)}
+			{items.map((item) => (
+				<div
+					key={item.label}
+					className="glass border border-white/5 rounded-xl p-4"
+				>
+					<p className="text-xs text-white/40 uppercase tracking-widest mb-1">
+						{item.label}
+					</p>
+					<p
+						className={`text-2xl font-bold ${item.color} ${
+							loading ? "opacity-40 animate-pulse" : ""
+						}`}
+					>
+						{item.value}
+					</p>
+				</div>
+			))}
+		</div>
+	)
+}
+
+const EvidenceLink: React.FC<{ value: string }> = ({ value }) => {
+	if (!value) {
+		return <span className="text-xs text-white/30">No evidence</span>
+	}
+
+	if (/^https?:\/\//.test(value)) {
+		return (
+			<a
+				href={value}
+				target="_blank"
+				rel="noreferrer"
+				className="text-xs text-brand-cyan hover:underline"
+			>
+				Open link
+			</a>
+		)
+	}
+
+	return <TxHashLink hash={value} />
+}
+
 const Admin: React.FC = () => {
 	const [activeSection, setActiveSection] = useState<AdminSection>("courses")
 	const navigate = useNavigate()
@@ -127,7 +308,7 @@ const Admin: React.FC = () => {
 			<aside className="w-72 glass border-r border-white/5 p-8 flex flex-col gap-8">
 				<nav className="flex flex-col gap-2">
 					{(
-						["courses", "milestones", "users", "treasury", "scholarships", "contracts"] as const
+						["courses", "milestones", "users", "wiki", "treasury", "scholarships", "contracts"] as const
 					).map((section) => (
 						<button
 							key={section}
@@ -154,6 +335,7 @@ const Admin: React.FC = () => {
 				{activeSection === "users" && <UserLookup />}
 				{activeSection === "wiki" && <WikiManagement />}
 				{activeSection === "treasury" && <TreasuryControls />}
+				{activeSection === "wiki" && <WikiManagement />}
 				{activeSection === "scholarships" && <ScholarshipMetrics />}
 				{activeSection === "contracts" && <ContractInfo />}
 			</main>
@@ -1375,4 +1557,3 @@ const ScholarshipMetrics: React.FC = () => {
 	)
 }
 
-export default Admin

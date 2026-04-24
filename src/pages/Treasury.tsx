@@ -94,51 +94,16 @@ const Treasury: React.FC = () => {
 	const { balance: treasuryUSDC, isLoading: treasuryLoading } =
 		useUSDC(scholarshipTreasury)
 
-	const [stats, setStats] = useState<TreasuryStats | null>(null)
-	const [activity, setActivity] = useState<TreasuryEvent[]>([])
-	const [loading, setLoading] = useState(true)
-
-	interface ScholarshipMetrics {
-		active_scholarships: number
-		total_scholars: number
-		completion_rate: number
-		avg_milestones_per_scholar: number
-		dropout_rate: number
-		total_usdc_disbursed: number
-	}
-
-	const [scholarshipMetrics, setScholarshipMetrics] =
-		useState<ScholarshipMetrics | null>(null)
-
-	useEffect(() => {
-		const fetchTreasuryData = async () => {
-			try {
-				const [statsRes, activityRes, metricsRes] = await Promise.all([
-					fetch(`${API_BASE}/api/treasury/stats`),
-					fetch(`${API_BASE}/api/treasury/activity?limit=20`),
-					fetch(`${API_BASE}/api/scholarships/metrics`),
-				])
-
-				if (statsRes.ok) {
-					const statsData = await statsRes.json()
-					setStats(statsData)
-				}
-
-				if (activityRes.ok) {
-					const activityData = await activityRes.json()
-					setActivity(activityData.events || [])
-				}
-
-				if (metricsRes.ok) {
-					const metricsData = await metricsRes.json()
-					setScholarshipMetrics(metricsData)
-				}
-			} catch (err) {
-				console.error("Failed to fetch treasury data:", err)
-			} finally {
-				setLoading(false)
-			}
-		}
+	const {
+		stats,
+		activity,
+		isLoading,
+		isError,
+		refetch,
+		hasMoreActivity,
+		isLoadingMoreActivity,
+		loadMoreActivity,
+	} = useTreasury()
 
 	const activityLoading = isLoading
 	const statsLoading = isLoading
@@ -236,7 +201,7 @@ const Treasury: React.FC = () => {
 	const description = `LearnVault's decentralized scholarship treasury holds ${displayStats.totalTreasury} and has funded ${displayStats.scholarsFunded} scholars. View real-time inflows and disbursements.`
 
 	return (
-		<div aria-busy={loading} className="p-12 max-w-7xl mx-auto min-h-screen text-white animate-in fade-in duration-1000">
+		<div aria-busy={isLoading} className="p-12 max-w-7xl mx-auto min-h-screen text-white animate-in fade-in duration-1000">
 			<Helmet>
 				<title>{title}</title>
 				<meta property="og:title" content={title} />
@@ -390,7 +355,7 @@ const Treasury: React.FC = () => {
 			</div>
 
 			{/* Scholarship Program Metrics */}
-			<section aria-busy={loading} className="mt-20">
+			<section aria-busy={isLoading} className="mt-20">
 				<h2 className="text-4xl font-black mb-2 tracking-tighter">
 					Scholarship Program
 				</h2>
@@ -398,7 +363,7 @@ const Treasury: React.FC = () => {
 					Real-time health metrics for the active scholarship cohort.
 				</p>
 
-				{loading && (
+				{isLoading && (
 					<div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
 						{Array.from({ length: 6 }).map((_, i) => (
 							<div
@@ -409,58 +374,7 @@ const Treasury: React.FC = () => {
 					</div>
 				)}
 
-				{!loading && scholarshipMetrics && (
-					<div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-						{[
-							{
-								label: "Active Scholarships",
-								value: scholarshipMetrics.active_scholarships,
-								icon: "🎓",
-								color: "text-brand-cyan",
-							},
-							{
-								label: "Total Scholars",
-								value: scholarshipMetrics.total_scholars,
-								icon: "👩‍🎓",
-								color: "text-brand-blue",
-							},
-							{
-								label: "Completion Rate",
-								value: `${scholarshipMetrics.completion_rate}%`,
-								icon: "✅",
-								color: "text-brand-emerald",
-							},
-							{
-								label: "Avg Milestones / Scholar",
-								value: scholarshipMetrics.avg_milestones_per_scholar,
-								icon: "📊",
-								color: "text-white",
-							},
-							{
-								label: "Dropout Rate",
-								value: `${scholarshipMetrics.dropout_rate}%`,
-								icon: "⚠️",
-								color: "text-red-400",
-							},
-							{
-								label: "Total USDC Disbursed",
-								value: `$${(scholarshipMetrics.total_usdc_disbursed / 1e7).toLocaleString(undefined, { maximumFractionDigits: 2 })}`,
-								icon: "💸",
-								color: "text-brand-purple",
-							},
-						].map(({ label, value, icon, color }) => (
-							<StatCard
-								key={label}
-								label={label}
-								value={String(value)}
-								icon={icon}
-								color={color}
-							/>
-						))}
-					</div>
-				)}
-
-				{!loading && !scholarshipMetrics && (
+				{!isLoading && (
 					<p className="text-white/40 text-center py-10">
 						Scholarship metrics unavailable
 					</p>
@@ -566,6 +480,8 @@ const ActivityFeed: React.FC<{
 		<div className="flex flex-col gap-4">
 			{loading ? (
 				<ActivityFeedSkeleton rows={2} />
+			) : error ? (
+				<div className="text-center text-white/40 py-8">{error}</div>
 			) : items.length === 0 ? (
 				<div className="text-center text-white/40 py-8">{emptyMessage}</div>
 			) : (
