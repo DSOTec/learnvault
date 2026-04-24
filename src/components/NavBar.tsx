@@ -2,6 +2,16 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useEffect, useId, useState, useCallback } from "react"
 import { useTranslation } from "react-i18next"
 import { NavLink } from "react-router-dom"
+import { fetchCourses } from "../hooks/useCourses"
+import { fetchLeaderboard } from "../hooks/useLeaderboard"
+import { fetchProposals } from "../hooks/useProposals"
+import {
+	fetchTreasuryActivityPage,
+	fetchTreasuryStats,
+} from "../hooks/useTreasury"
+import { useWallet } from "../hooks/useWallet"
+import { fetchHistory } from "../pages/History"
+import GlobalSearch from "./GlobalSearch"
 import { NotificationBell } from "./NotificationBell"
 import { ReputationBadge } from "./ReputationBadge"
 import { ThemeToggle } from "./ThemeToggle"
@@ -130,7 +140,7 @@ export default function NavBar() {
 						showBalance
 					/>
 					<NotificationBell token={token} />
-					<div className="hidden sm:block scale-90">
+					<div className="hidden md:block scale-90 [&_button]:dark:text-black [&_button]:dark:bg-white">
 						<WalletButton />
 					</div>
 					<button

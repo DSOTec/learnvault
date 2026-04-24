@@ -213,7 +213,6 @@ export const NoCredentialsEmptyState: React.FC = () => (
 		ctaHref="/learn"
 	/>
 )
-
 // ─── Stat Card Skeleton ───────────────────────────────────────────────────────
 // Issue #732 — Matching shape of StatCard on Treasury / Dashboard pages
 
@@ -251,4 +250,3 @@ export const ActivityFeedSkeleton: React.FC<{ rows?: number }> = ({
 		))}
 	</div>
 )
-
