@@ -11,6 +11,7 @@ import { useToast } from "../components/Toast/ToastProvider"
 import {
 	type ProposalRecord,
 	useProposal,
+	useProposalVotes,
 	useProposals,
 } from "../hooks/useProposals"
 import {
@@ -63,6 +64,7 @@ const getFilterValue = (proposal: ProposalRecord): FilterType => {
 const DaoProposals: React.FC = () => {
 	const [searchParams, setSearchParams] = useSearchParams()
 	const [filter, setFilter] = useState<FilterType>("Voting Open")
+	const [showLiveVotes, setShowLiveVotes] = useState(false)
 	const [now, setNow] = useState(() => Date.now())
 	const {
 		proposals,
@@ -159,6 +161,11 @@ const DaoProposals: React.FC = () => {
 	const selectedProposalId =
 		selectedFromList?.id ?? fallbackSelected?.id ?? null
 	const selectedProposalQuery = useProposal(selectedProposalId)
+	const showVotesSection = Boolean(
+		selectedProposal &&
+			(!selectedProposal.isVotingOpen || showLiveVotes),
+	)
+	const votesQuery = useProposalVotes(selectedProposalId, showVotesSection)
 	const selectedProposal =
 		selectedProposalQuery.data ?? selectedFromList ?? fallbackSelected ?? null
 
@@ -490,6 +497,73 @@ const DaoProposals: React.FC = () => {
 									Total voting power cast: {formatTokenAmount(totalVotes)} GOV
 								</p>
 								<p>{formatCountdown(selectedProposal.deadline, now)}</p>
+							</div>
+							<div className="mb-8 rounded-2xl border border-white/10 bg-white/5 p-4">
+								<div className="flex items-center justify-between gap-3 mb-4">
+									<h4 className="text-sm font-black uppercase tracking-widest text-white/70">
+										Vote transparency
+									</h4>
+									{selectedProposal?.isVotingOpen && (
+										<label className="text-xs text-white/60 flex items-center gap-2">
+											<input
+												type="checkbox"
+												checked={showLiveVotes}
+												onChange={(e) => setShowLiveVotes(e.target.checked)}
+											/>
+											Show before close
+										</label>
+									)}
+								</div>
+								{showVotesSection ? (
+									<>
+										<div className="flex items-center gap-4 mb-4">
+											<div
+												className="w-20 h-20 rounded-full border border-white/10"
+												style={{
+													background: `conic-gradient(#00d4ff 0 ${yesPercent}%, #a855f7 ${yesPercent}% 100%)`,
+												}}
+												aria-label="Vote breakdown pie chart"
+												title={`For ${yesPercent}%, Against ${noPercent}%`}
+											/>
+											<div className="text-xs text-white/60 space-y-1">
+												<p>For: {yesPercent}%</p>
+												<p>Against: {noPercent}%</p>
+											</div>
+										</div>
+										{votesQuery.data?.unavailable ? (
+											<p className="text-xs text-white/40">
+												Voter list endpoint is not available yet.
+											</p>
+										) : (
+											<ul className="space-y-2 max-h-56 overflow-auto pr-1">
+												{(votesQuery.data?.votes ?? []).map((vote, idx) => (
+													<li
+														key={`${vote.voterAddress}-${idx}`}
+														className="flex items-center justify-between rounded-lg border border-white/10 px-3 py-2 text-xs"
+													>
+														<span title={vote.voterAddress} className="font-mono text-white/70">
+															{vote.voterAddress.slice(0, 6)}...
+															{vote.voterAddress.slice(-4)}
+														</span>
+														<span className={vote.support ? "text-brand-cyan" : "text-brand-purple"}>
+															{vote.support ? "For" : "Against"}
+														</span>
+														<span className="text-white/60">{vote.weight.toString()}</span>
+													</li>
+												))}
+												{(votesQuery.data?.votes?.length ?? 0) === 0 && (
+													<li className="text-xs text-white/40">
+														No vote records available.
+													</li>
+												)}
+											</ul>
+										)}
+									</>
+								) : (
+									<p className="text-xs text-white/40">
+										Voter list is shown after voting closes, or enable the opt-in toggle.
+									</p>
+								)}
 							</div>
 
 							{userHasVoted ? (

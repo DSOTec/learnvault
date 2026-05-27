@@ -219,6 +219,16 @@ const Courses: React.FC = () => {
 									<p className="mb-5 text-sm leading-relaxed text-white/55">
 										{course.description}
 									</p>
+									{course.ratingSummary && course.ratingSummary.count > 0 ? (
+										<div className="mb-5 flex items-center gap-2 text-xs text-white/70">
+											<span className="text-yellow-300">
+												{"★".repeat(Math.max(1, Math.min(5, Math.round(course.ratingSummary.average))))}
+											</span>
+											<span>
+												{course.ratingSummary.average.toFixed(1)} ({course.ratingSummary.count})
+											</span>
+										</div>
+									) : null}
 
 									<SponsorLogosForTrack track={course.track} compact />
 
