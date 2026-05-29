@@ -61,6 +61,7 @@ import { createUploadRouter } from "./routes/upload.routes"
 import { createUserProfileRouter } from "./routes/user-profile.routes"
 import { validatorRouter } from "./routes/validator.routes"
 import { wikiRouter } from "./routes/wiki.routes"
+import { createRecommendationsRouter } from "./routes/recommendations.routes"
 import { createAuthService } from "./services/auth.service"
 import {
 	createJwtService,
