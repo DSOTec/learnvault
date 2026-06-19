@@ -27,20 +27,20 @@ import { createNonceStore } from "./db/nonce-store"
 import { createTokenStore } from "./db/token-store"
 import { logger } from "./lib/logger"
 import { setupConsoleRequestTracing } from "./lib/request-context"
+import { apiVersionRedirect } from "./middleware/api-version.middleware"
 import { createRequireTrustedOrigin } from "./middleware/csrf.middleware"
 import { errorHandler } from "./middleware/error.middleware"
 import { maybeMountOpenApiValidator } from "./middleware/openapi-validator.middleware"
-import { apiVersionRedirect } from "./middleware/api-version.middleware"
 import {
 	generalLimiter,
 	writeLimiter,
 } from "./middleware/rate-limit.middleware"
 import { requestLogger } from "./middleware/request-logger.middleware"
 import { buildOpenApiSpec } from "./openapi"
-import { antiSybilRouter } from "./routes/anti-sybil.routes"
 import { adminMilestonesRouter } from "./routes/admin-milestones.routes"
 import { adminProviderKeysRouter } from "./routes/admin-provider-keys.routes"
 import { adminRouter } from "./routes/admin.routes"
+import { antiSybilRouter } from "./routes/anti-sybil.routes"
 import { createAuthRouter } from "./routes/auth.routes"
 import { createCommentsRouter } from "./routes/comments.routes"
 import { communityRouter } from "./routes/community.routes"
@@ -50,12 +50,12 @@ import { donorsRouter } from "./routes/donors.routes"
 import { createEnrollmentsRouter } from "./routes/enrollments.routes"
 import { eventsRouter } from "./routes/events.routes"
 import { governanceRouter } from "./routes/governance.routes"
-import { createMilestoneAppealRouter } from "./routes/milestone-appeal.routes"
 import { healthRouter } from "./routes/health.routes"
 import { impactRouter } from "./routes/impact.routes"
 import { leaderboardRouter } from "./routes/leaderboard.routes"
 import { createMeRouter } from "./routes/me.routes"
 import { mentorshipRouter } from "./routes/mentorship.routes"
+import { createMilestoneAppealRouter } from "./routes/milestone-appeal.routes"
 import { moderationRouter } from "./routes/moderation.routes"
 import { notificationsRouter } from "./routes/notifications.routes"
 import { createPeerReviewRouter } from "./routes/peer-review.routes"
@@ -237,6 +237,12 @@ if (process.env.NODE_ENV !== "test") {
 	void import("./workers/escrow-timeout-worker").then(
 		({ startEscrowTimeoutWorker }) => {
 			void startEscrowTimeoutWorker().catch(console.error)
+		},
+	)
+
+	void import("./workers/deadline-reminder-worker").then(
+		({ startDeadlineReminderWorker }) => {
+			void startDeadlineReminderWorker().catch(console.error)
 		},
 	)
 }
