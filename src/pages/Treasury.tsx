@@ -13,7 +13,6 @@ import TreasuryHealthChart, {
 	type TreasuryPoint,
 } from "../components/treasury/TreasuryHealthChart"
 import TxHashLink from "../components/TxHashLink"
-import { ActivityFeedSkeleton } from "../components/SkeletonLoader"
 import { useContractIds } from "../hooks/useContractIds"
 import { useTreasury } from "../hooks/useTreasury"
 import { useUSDC } from "../hooks/useUSDC"
@@ -682,6 +681,7 @@ const ActivityFeed: React.FC<{
 								>
 									{item.amount}
 								</p>
+							</div>
 							</div>
 						))}
 						{showLoadMore && onLoadMore ? (

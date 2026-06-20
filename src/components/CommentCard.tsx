@@ -48,7 +48,6 @@ const CommentCard: React.FC<CommentCardProps> = ({
 }) => {
 	const { address } = useWallet()
 	const [isReplying, setIsReplying] = useState(false)
-	const { address } = useWallet()
 	const [replyText, setReplyText] = useState("")
 	const [replyError, setReplyError] = useState<string | null>(null)
 	const [isFlagging, setIsFlagging] = useState(false)
@@ -57,6 +56,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	const [isEditing, setIsEditing] = useState(false)
 	const [editText, setEditText] = useState(comment.content)
 	const [editError, setEditError] = useState<string | null>(null)
+	const [showFlagDialog, setShowFlagDialog] = useState(false)
 	const replyFieldId = useId()
 	const replyHintId = `${replyFieldId}-hint`
 	const replyErrorId = `${replyFieldId}-error`
@@ -198,6 +198,27 @@ const CommentCard: React.FC<CommentCardProps> = ({
 			console.error("Delete failed", err)
 		} finally {
 			setShowDeleteConfirm(false)
+		}
+	}
+
+	const handleFlag = async (reason: string) => {
+		const token = getAuthToken()
+		if (!token) return
+		try {
+			const res = await fetch(`${API_URL}/api/comments/${comment.id}/flag`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({ reason }),
+			})
+			if (res.ok) {
+				setShowFlagDialog(false)
+				onUpdate?.()
+			}
+		} catch (err) {
+			console.error("Flag failed", err)
 		}
 	}
 
