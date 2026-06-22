@@ -3,8 +3,8 @@ import React, { useId, useState } from "react"
 import { useWallet } from "../hooks/useWallet"
 import { getAuthToken } from "../util/auth"
 import ConfirmDialog from "./ConfirmDialog"
-import SafeMarkdown from "./SafeMarkdown"
 import FlagDialog from "./FlagDialog"
+import SafeMarkdown from "./SafeMarkdown"
 
 export interface Comment {
 	id: number
@@ -64,8 +64,7 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	const authorId = `comment-${comment.id}-author`
 
 	const isOwnComment =
-		!!address &&
-		comment.author_address.toLowerCase() === address.toLowerCase()
+		!!address && comment.author_address.toLowerCase() === address.toLowerCase()
 
 	const handleSaveEdit = async () => {
 		if (!editText.trim()) {
@@ -325,15 +324,16 @@ const CommentCard: React.FC<CommentCardProps> = ({
 							Delete
 						</button>
 					)}
-					{address && address.toLowerCase() !== comment.author_address.toLowerCase() && (
-						<button
-							type="button"
-							onClick={() => setShowFlagDialog(true)}
-							className="text-[10px] font-black uppercase text-red-400/70 hover:text-red-400 transition-colors"
-						>
-							Flag
-						</button>
-					)}
+					{address &&
+						address.toLowerCase() !== comment.author_address.toLowerCase() && (
+							<button
+								type="button"
+								onClick={() => setShowFlagDialog(true)}
+								className="text-[10px] font-black uppercase text-red-400/70 hover:text-red-400 transition-colors"
+							>
+								Flag
+							</button>
+						)}
 					{!isReply && (
 						<button
 							type="button"

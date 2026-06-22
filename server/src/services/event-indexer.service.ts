@@ -1,20 +1,18 @@
 import { rpc as StellarRpc } from "@stellar/stellar-sdk"
-import { Pool } from "pg"
+import { pool } from "../db/index"
+import { createNotification } from "../db/notifications-store"
+import { invalidateApiResponseCacheType } from "../lib/api-response-cache"
 import {
 	SOROBAN_RPC_URL,
 	INDEXER_CONFIG,
 	getPollingTargets,
 } from "../lib/event-config"
-import { getRpcCache, CacheKey } from "../lib/rpc-cache"
 import { leaderboardEmitter } from "../lib/leaderboard-emitter"
-import { invalidateApiResponseCacheType } from "../lib/api-response-cache"
 import { logger } from "../lib/logger"
-import { createNotification } from "../db/notifications-store"
+import { getRpcCache, CacheKey } from "../lib/rpc-cache"
 import { deliverNotificationChannels } from "./notification-delivery.service"
 
 const log = logger.child({ module: "indexer" })
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL! })
 
 const rpc = new StellarRpc.Server(SOROBAN_RPC_URL)
 
@@ -119,8 +117,7 @@ async function invalidateCacheForEvent(
 			}
 			break
 		case "ScholarshipTreasury_VoteCastEvent": {
-			const voter =
-				typeof data.voter === "string" ? data.voter : null
+			const voter = typeof data.voter === "string" ? data.voter : null
 			if (voter) {
 				await cache.invalidate(CacheKey.votingPower(voter))
 			}
@@ -202,7 +199,10 @@ export async function processWebhookEvents(
 				contractMaxLedger.set(ev.contract, ledger)
 			}
 		} catch (err) {
-			log.error({ err, eventId: ev.id, contract: ev.contract }, "Webhook event error")
+			log.error(
+				{ err, eventId: ev.id, contract: ev.contract },
+				"Webhook event error",
+			)
 			skipped++
 		}
 	}
@@ -211,7 +211,10 @@ export async function processWebhookEvents(
 		await updateIndexerState(contract, lastLedger)
 	}
 
-	log.info({ inserted, skipped, count: events.length }, "Webhook events processed")
+	log.info(
+		{ inserted, skipped, count: events.length },
+		"Webhook events processed",
+	)
 	return { inserted, skipped }
 }
 

@@ -1,43 +1,18 @@
-import { Pool } from "pg"
+import { Pool, type PoolConfig } from "pg"
 
-import { logger } from "../lib/logger"
 import { poolMonitor } from "../services/pool-monitor.service"
-
-const log = logger.child({ module: "db" })
+import { resolvePoolEnvConfig } from "./pool-config"
 
 // Environment-specific pool configuration
 const getPoolConfig = () => {
 	const isProduction = process.env.NODE_ENV === "production"
 	const isDevelopment = process.env.NODE_ENV === "development"
-
-	// Recommended pool sizes per environment
-	const poolSizes = {
-		production: {
-			max: 20,
-			min: 4,
-			idleTimeoutMillis: 30000,
-			connectionTimeoutMillis: 5000,
-		},
-		staging: {
-			max: 15,
-			min: 2,
-			idleTimeoutMillis: 30000,
-			connectionTimeoutMillis: 5000,
-		},
-		development: {
-			max: 5,
-			min: 1,
-			idleTimeoutMillis: 30000,
-			connectionTimeoutMillis: 5000,
-		},
-	}
-
 	const env = isProduction
 		? "production"
 		: isDevelopment
 			? "development"
 			: "staging"
-	const config = poolSizes[env as keyof typeof poolSizes]
+	const config = resolvePoolEnvConfig()
 
 	return {
 		connectionString: process.env.DATABASE_URL,
@@ -67,22 +42,18 @@ let activePool: Pool | MockPool
 try {
 	const poolConfig = getPoolConfig()
 	activePool = new Pool(poolConfig)
-	log.info(
-		{
-			max: poolConfig.max,
-			min: poolConfig.min,
-			idleTimeoutMillis: poolConfig.idleTimeoutMillis,
-			connectionTimeoutMillis: poolConfig.connectionTimeoutMillis,
-		},
-		"Pool configured",
+	console.log(
+		`[db] Pool configured: max=${poolConfig.max}, min=${poolConfig.min}, idleTimeout=${poolConfig.idleTimeoutMillis}ms, connectionTimeout=${poolConfig.connectionTimeoutMillis}ms`,
 	)
 
-	// Initialize pool monitoring
 	if (activePool instanceof Pool) {
+		activePool.on("error", (err) => {
+			log.error({ err }, "Unexpected error on idle database pool client")
+		})
 		poolMonitor.initializeMonitor(activePool)
 	}
-} catch (err) {
-	log.warn({ err }, "Failed to create postgres pool, using mock")
+} catch {
+	console.warn("[db] Failed to create postgres pool, using mock")
 	activePool = new MockPool()
 }
 

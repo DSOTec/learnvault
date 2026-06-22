@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install App dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps --force
 
       - name: Build app
         env:
