@@ -1,12 +1,10 @@
 import { Pool, type PoolConfig } from "pg"
 
-import { logger } from "../lib/logger"
 import { poolMonitor } from "../services/pool-monitor.service"
 import { resolvePoolEnvConfig } from "./pool-config"
 
-const log = logger.child({ module: "db" })
-
-export const getPoolConfig = (): PoolConfig => {
+// Environment-specific pool configuration
+const getPoolConfig = () => {
 	const isProduction = process.env.NODE_ENV === "production"
 	const isDevelopment = process.env.NODE_ENV === "development"
 	const env = isProduction
@@ -44,14 +42,8 @@ let activePool: Pool | MockPool
 try {
 	const poolConfig = getPoolConfig()
 	activePool = new Pool(poolConfig)
-	log.info(
-		{
-			max: poolConfig.max,
-			min: poolConfig.min,
-			idleTimeoutMillis: poolConfig.idleTimeoutMillis,
-			connectionTimeoutMillis: poolConfig.connectionTimeoutMillis,
-		},
-		"Pool configured",
+	console.log(
+		`[db] Pool configured: max=${poolConfig.max}, min=${poolConfig.min}, idleTimeout=${poolConfig.idleTimeoutMillis}ms, connectionTimeout=${poolConfig.connectionTimeoutMillis}ms`,
 	)
 
 	if (activePool instanceof Pool) {
@@ -60,8 +52,8 @@ try {
 		})
 		poolMonitor.initializeMonitor(activePool)
 	}
-} catch (err) {
-	log.warn({ err }, "Failed to create postgres pool, using mock")
+} catch {
+	console.warn("[db] Failed to create postgres pool, using mock")
 	activePool = new MockPool()
 }
 

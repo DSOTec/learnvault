@@ -27,7 +27,7 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm ci --legacy-peer-deps --force
 
       - name: i18n key parity check
         run: npm run i18n-check
