@@ -42,6 +42,7 @@ scholarshipsRouter.get("/scholarships/metrics", (req, res) => {
 
 /**
  * @openapi
+ * /api/scholarships/apply:
  *   post:
  *     tags: [Scholarships]
  *     summary: Submit a scholarship application

@@ -439,6 +439,24 @@ export const buildOpenApiSpec = () => {
 							"revoked",
 						],
 					},
+					CourseReview: {
+						type: "object",
+						properties: {
+							id: { type: "integer" },
+							course_id: { type: "string" },
+							learner_address: { type: "string" },
+							rating: { type: "integer", minimum: 1, maximum: 5 },
+							reviewText: { type: "string", nullable: true },
+							created_at: { type: "string", format: "date-time" },
+						},
+						required: [
+							"id",
+							"course_id",
+							"learner_address",
+							"rating",
+							"created_at",
+						],
+					},
 					CourseImportRow: {
 						type: "object",
 						properties: {
