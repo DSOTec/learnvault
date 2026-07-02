@@ -162,9 +162,7 @@ export function createAdminKeyRotationService(
 			)
 		},
 
-		async checkRotationStatus(
-			adminAddress: string,
-		): Promise<{
+		async checkRotationStatus(adminAddress: string): Promise<{
 			lastRotated: Date
 			daysSinceRotation: number
 			needsRotation: boolean

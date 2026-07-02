@@ -16,25 +16,21 @@ const mockAuthService: jest.Mocked<AuthService> = {
 const mockJwtService: jest.Mocked<JwtService> = {
 	signWalletToken: jest.fn().mockReturnValue("mock-token"),
 	signRefreshToken: jest.fn().mockReturnValue("mock-refresh-token"),
-	issueTokenPair: jest
-		.fn()
-		.mockReturnValue({
-			accessToken: "mock-token",
-			refreshToken: "mock-refresh-token",
-		}),
+	issueTokenPair: jest.fn().mockReturnValue({
+		accessToken: "mock-token",
+		refreshToken: "mock-refresh-token",
+	}),
 	verifyWalletToken: jest
 		.fn()
 		.mockResolvedValue({ sub: "mock-address", jti: "mock-jti" }),
 	verifyRefreshToken: jest
 		.fn()
 		.mockResolvedValue({ sub: "mock-address", jti: "mock-jti" }),
-	rotateRefreshToken: jest
-		.fn()
-		.mockResolvedValue({
-			accessToken: "mock-token",
-			refreshToken: "mock-refresh-token",
-			sub: "mock-address",
-		}),
+	rotateRefreshToken: jest.fn().mockResolvedValue({
+		accessToken: "mock-token",
+		refreshToken: "mock-refresh-token",
+		sub: "mock-address",
+	}),
 	revokeToken: jest.fn().mockResolvedValue(undefined),
 }
 

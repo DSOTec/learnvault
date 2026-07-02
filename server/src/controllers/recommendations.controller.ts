@@ -1,7 +1,10 @@
 import { type Response } from "express"
-import { type AuthRequest } from "../middleware/auth.middleware"
-import { getRecommendations, logRecommendationEngagement } from "../services/recommendation.service"
 import { logger } from "../lib/logger"
+import { type AuthRequest } from "../middleware/auth.middleware"
+import {
+	getRecommendations,
+	logRecommendationEngagement,
+} from "../services/recommendation.service"
 
 const log = logger.child({ module: "recommendations" })
 
@@ -16,11 +19,12 @@ export const getLearnerRecommendations = async (
 			return
 		}
 
-		const limitParam = typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : 4
+		const limitParam =
+			typeof req.query.limit === "string" ? parseInt(req.query.limit, 10) : 4
 		const limit = !isNaN(limitParam) && limitParam > 0 ? limitParam : 4
 
 		const recommendations = await getRecommendations(walletAddress, limit)
-		
+
 		res.status(200).json({ data: recommendations })
 	} catch (error) {
 		log.error({ err: error }, "Failed to get recommendations")
@@ -47,11 +51,17 @@ export const engageRecommendation = async (
 		}
 
 		if (!action || !["view", "click", "dismiss"].includes(action)) {
-			res.status(400).json({ error: "action must be one of: view, click, dismiss" })
+			res
+				.status(400)
+				.json({ error: "action must be one of: view, click, dismiss" })
 			return
 		}
 
-		await logRecommendationEngagement(walletAddress, courseSlug, action as "view" | "click" | "dismiss")
+		await logRecommendationEngagement(
+			walletAddress,
+			courseSlug,
+			action as "view" | "click" | "dismiss",
+		)
 
 		res.status(200).json({ success: true })
 	} catch (error) {

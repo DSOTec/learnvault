@@ -1,17 +1,17 @@
 [
-  {
-    "name": "Main Bundle",
-    "path": "dist/assets/*.js",
-    "limit": "250 kB"
-  },
-  {
-    "name": "Framework/Vendor Chunks",
-    "path": "dist/assets/framework-*.js",
-    "limit": "150 kB"
-  },
-  {
-    "name": "CSS Assets",
-    "path": "dist/assets/*.css",
-    "limit": "50 kB"
-  }
+	{
+		"name": "Main Bundle",
+		"path": "dist/assets/*.js",
+		"limit": "250 kB"
+	},
+	{
+		"name": "Framework/Vendor Chunks",
+		"path": "dist/assets/framework-*.js",
+		"limit": "150 kB"
+	},
+	{
+		"name": "CSS Assets",
+		"path": "dist/assets/*.css",
+		"limit": "50 kB"
+	}
 ]

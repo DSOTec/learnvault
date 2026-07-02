@@ -13,6 +13,7 @@ export default [
 		"**/*.yml",
 		"**/*.yaml",
 		"src/hooks/useAdmin.test.tsx",
+		"src/vendor/**",
 	]),
 	...config,
 	{

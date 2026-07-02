@@ -55,4 +55,8 @@ export const leaderboardRouter = Router()
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-leaderboardRouter.get("/leaderboard", apiResponseCache("leaderboard"), getLeaderboard)
+leaderboardRouter.get(
+	"/leaderboard",
+	apiResponseCache("leaderboard"),
+	getLeaderboard,
+)

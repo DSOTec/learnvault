@@ -1,5 +1,5 @@
-import Redis from "ioredis"
 import crypto from "crypto"
+import Redis from "ioredis"
 
 /**
  * API response cache for expensive GET endpoints.
@@ -140,4 +140,3 @@ export async function invalidateApiResponseCacheType(
 export function _clearMemoryApiResponseCache(): void {
 	memStore.clear()
 }
-

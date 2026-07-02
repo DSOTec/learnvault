@@ -169,9 +169,7 @@ export async function generateCertificate(
 			 WHERE course_id = (SELECT id FROM courses WHERE slug = $1 OR id::text = $1)`,
 			[courseId],
 		)
-		const totalMilestones = Number(
-			totalMilestonesResult.rows[0]?.total ?? 0,
-		)
+		const totalMilestones = Number(totalMilestonesResult.rows[0]?.total ?? 0)
 
 		// Count milestones the learner has had approved
 		const approvedResult = await pool.query<{ approved: string }>(
@@ -192,10 +190,7 @@ export async function generateCertificate(
 				progress: {
 					milestones_total: totalMilestones,
 					milestones_approved: approvedCount,
-					milestones_remaining: Math.max(
-						0,
-						totalMilestones - approvedCount,
-					),
+					milestones_remaining: Math.max(0, totalMilestones - approvedCount),
 					percent_complete:
 						totalMilestones > 0
 							? Math.floor((approvedCount / totalMilestones) * 100)
@@ -269,10 +264,7 @@ export async function generateCertificate(
 				verificationId,
 			})
 
-			pdfHash = crypto
-				.createHash("sha256")
-				.update(pdfBuffer)
-				.digest("hex")
+			pdfHash = crypto.createHash("sha256").update(pdfBuffer).digest("hex")
 
 			// ------------------------------------------------------------------
 			// 6. Persist certificate metadata

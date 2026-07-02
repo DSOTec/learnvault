@@ -1,6 +1,10 @@
 import { Router } from "express"
 
 import {
+	generateCertificate,
+	verifyCertificate,
+} from "../controllers/certificates.controller"
+import {
 	createCourse,
 	getCourse,
 	getCourseLessonById,
@@ -9,16 +13,12 @@ import {
 	updateLessonVersion,
 	updateCourse,
 } from "../controllers/courses.controller"
-import {
-	generateCertificate,
-	verifyCertificate,
-} from "../controllers/certificates.controller"
+import { apiResponseCache } from "../middleware/api-response-cache.middleware"
+import { createRequireAuth } from "../middleware/auth.middleware"
 import {
 	requireCourseAdmin,
 	requireCourseAdminIfRequested,
 } from "../middleware/course-admin.middleware"
-import { createRequireAuth } from "../middleware/auth.middleware"
-import { apiResponseCache } from "../middleware/api-response-cache.middleware"
 import { type JwtService } from "../services/jwt.service"
 
 export function createCoursesRouter(jwtService: JwtService): Router {
@@ -51,11 +51,7 @@ export function createCoursesRouter(jwtService: JwtService): Router {
 	router.patch("/courses/:id", requireCourseAdmin, updateCourse)
 
 	// Certificate endpoints — generation requires authentication (Issue #667)
-	router.get(
-		"/courses/:courseId/certificate",
-		requireAuth,
-		generateCertificate,
-	)
+	router.get("/courses/:courseId/certificate", requireAuth, generateCertificate)
 	router.get("/certificates/:certificateId/verify", verifyCertificate)
 
 	return router
@@ -63,5 +59,3 @@ export function createCoursesRouter(jwtService: JwtService): Router {
 
 /** @deprecated Use createCoursesRouter(jwtService) instead */
 export const coursesRouter = Router()
-
-

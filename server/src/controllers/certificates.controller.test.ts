@@ -168,9 +168,7 @@ describe("GET /api/courses/:courseId/certificate — happy path", () => {
 	function setupCompletedCourse() {
 		// 1. course lookup
 		mockedQuery.mockResolvedValueOnce({
-			rows: [
-				{ slug: COURSE_SLUG, title: "Stellar Basics", lrn_reward: "100" },
-			],
+			rows: [{ slug: COURSE_SLUG, title: "Stellar Basics", lrn_reward: "100" }],
 		})
 		// 2. total milestones
 		mockedQuery.mockResolvedValueOnce({ rows: [{ total: "2" }] })
@@ -224,9 +222,7 @@ describe("GET /api/courses/:courseId/certificate — duplicate request", () => {
 	it("returns the existing certificate without re-inserting", async () => {
 		// 1. course lookup
 		mockedQuery.mockResolvedValueOnce({
-			rows: [
-				{ slug: COURSE_SLUG, title: "Stellar Basics", lrn_reward: "100" },
-			],
+			rows: [{ slug: COURSE_SLUG, title: "Stellar Basics", lrn_reward: "100" }],
 		})
 		// 2. total milestones
 		mockedQuery.mockResolvedValueOnce({ rows: [{ total: "2" }] })

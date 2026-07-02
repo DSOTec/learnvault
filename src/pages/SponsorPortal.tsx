@@ -99,7 +99,8 @@ export default function SponsorPortal() {
 					Organization Sponsor Portal
 				</h1>
 				<p className="mt-4 text-white/60">
-					Connect your wallet to create an organization profile and sponsor scholarship tracks.
+					Connect your wallet to create an organization profile and sponsor
+					scholarship tracks.
 				</p>
 			</div>
 		)
@@ -112,7 +113,8 @@ export default function SponsorPortal() {
 					Organization Sponsor Portal
 				</h1>
 				<p className="mt-4 max-w-3xl text-white/60">
-					Create your organization profile, sponsor targeted course tracks, monitor scholar progress, and generate quarterly impact reports.
+					Create your organization profile, sponsor targeted course tracks,
+					monitor scholar progress, and generate quarterly impact reports.
 				</p>
 			</header>
 
@@ -213,11 +215,18 @@ export default function SponsorPortal() {
 						</thead>
 						<tbody>
 							{(dashboard?.scholars ?? []).map((scholar) => (
-								<tr key={scholar.learner_address} className="border-t border-white/10">
-									<td className="px-3 py-2 font-mono text-xs">{scholar.learner_address}</td>
+								<tr
+									key={scholar.learner_address}
+									className="border-t border-white/10"
+								>
+									<td className="px-3 py-2 font-mono text-xs">
+										{scholar.learner_address}
+									</td>
 									<td className="px-3 py-2">{scholar.completed_milestones}</td>
 									<td className="px-3 py-2">{scholar.total_milestones}</td>
-									<td className="px-3 py-2">{formatPercent(scholar.completion_rate)}</td>
+									<td className="px-3 py-2">
+										{formatPercent(scholar.completion_rate)}
+									</td>
 								</tr>
 							))}
 							{(dashboard?.scholars ?? []).length === 0 && (
@@ -242,7 +251,12 @@ export default function SponsorPortal() {
 							type="number"
 							value={reportYear}
 							onChange={(event) =>
-								setReportYear(Number.parseInt(event.target.value || String(currentYear), 10))
+								setReportYear(
+									Number.parseInt(
+										event.target.value || String(currentYear),
+										10,
+									),
+								)
 							}
 							className="rounded-xl border border-white/15 bg-black/20 px-3 py-2"
 						/>
@@ -284,7 +298,9 @@ export default function SponsorPortal() {
 									className="border-t border-white/10"
 								>
 									<td className="px-3 py-2">{`${report.year} Q${report.quarter}`}</td>
-									<td className="px-3 py-2">{formatUsdc(report.total_donated_usdc)}</td>
+									<td className="px-3 py-2">
+										{formatUsdc(report.total_donated_usdc)}
+									</td>
 									<td className="px-3 py-2">{report.sponsored_tracks_count}</td>
 									<td className="px-3 py-2">{report.scholars_impacted}</td>
 									<td className="px-3 py-2">{report.milestones_completed}</td>
@@ -305,7 +321,9 @@ export default function SponsorPortal() {
 					<summary className="cursor-pointer text-sm font-black uppercase tracking-widest text-white/70">
 						Export JSON report payload
 					</summary>
-					<pre className="mt-3 max-h-64 overflow-auto text-xs text-white/70">{reportJson}</pre>
+					<pre className="mt-3 max-h-64 overflow-auto text-xs text-white/70">
+						{reportJson}
+					</pre>
 				</details>
 			</section>
 		</div>

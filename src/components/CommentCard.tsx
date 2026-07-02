@@ -56,7 +56,6 @@ const CommentCard: React.FC<CommentCardProps> = ({
 	const [isEditing, setIsEditing] = useState(false)
 	const [editText, setEditText] = useState(comment.content)
 	const [editError, setEditError] = useState<string | null>(null)
-	const [showFlagDialog, setShowFlagDialog] = useState(false)
 	const replyFieldId = useId()
 	const replyHintId = `${replyFieldId}-hint`
 	const replyErrorId = `${replyFieldId}-error`
@@ -180,29 +179,6 @@ const CommentCard: React.FC<CommentCardProps> = ({
 
 	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 	const [showFlagDialog, setShowFlagDialog] = useState(false)
-
-	const handleFlag = async (reason: string) => {
-		const token = getAuthToken()
-		if (!token) return
-		try {
-			await fetch(`${API_URL}/api/moderation/flag`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${token}`,
-				},
-				body: JSON.stringify({
-					contentType: "comment",
-					contentId: comment.id,
-					reason,
-				}),
-			})
-		} catch (err) {
-			console.error("Flag failed", err)
-		} finally {
-			setShowFlagDialog(false)
-		}
-	}
 
 	const handleDelete = async () => {
 		const token = getAuthToken()
