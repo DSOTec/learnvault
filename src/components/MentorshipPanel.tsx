@@ -48,7 +48,7 @@ const MentorshipPanel: React.FC = () => {
 						>
 							<div className="glass-card p-6 rounded-[2rem] h-full flex flex-col gap-3">
 								<div className="flex items-center gap-2">
-									<Icon.User size="sm" className="text-brand-cyan" />
+									<Icon.User01 size="sm" className="text-brand-cyan" />
 									<span className="font-mono text-sm text-white/60 truncate">
 										{mentor.address.slice(0, 8)}…{mentor.address.slice(-4)}
 									</span>

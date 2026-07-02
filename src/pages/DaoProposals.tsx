@@ -168,12 +168,12 @@ const DaoProposals: React.FC = () => {
 	const selectedProposalId =
 		selectedFromList?.id ?? fallbackSelected?.id ?? null
 	const selectedProposalQuery = useProposal(selectedProposalId)
+	const selectedProposal =
+		selectedProposalQuery.data ?? selectedFromList ?? fallbackSelected ?? null
 	const showVotesSection = Boolean(
 		selectedProposal && (!selectedProposal.isVotingOpen || showLiveVotes),
 	)
 	const votesQuery = useProposalVotes(selectedProposalId, showVotesSection)
-	const selectedProposal =
-		selectedProposalQuery.data ?? selectedFromList ?? fallbackSelected ?? null
 
 	useEffect(() => {
 		const interval = window.setInterval(() => setNow(Date.now()), 60000)

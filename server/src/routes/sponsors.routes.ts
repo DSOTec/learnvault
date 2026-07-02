@@ -1,4 +1,5 @@
 import { Router } from "express"
+import { type Pool } from "pg"
 import { SponsorLicenseCheckoutController } from "../controllers/sponsor-license-checkout.controller"
 import {
 	createTrackSponsorship,
@@ -9,11 +10,11 @@ import {
 	upsertOrganizationProfile,
 	upsertScholarRegion,
 } from "../controllers/sponsors.controller"
-import { getPool } from "../db/index"
+import { pool } from "../db/index"
 
 export const sponsorsRouter = Router()
 const licenseCheckoutController = new SponsorLicenseCheckoutController(
-	getPool(),
+	pool as Pool,
 )
 
 sponsorsRouter.get("/sponsors/organizations/:walletAddress", (req, res) => {

@@ -106,7 +106,7 @@ export default function Dashboard() {
 							/>
 							<DashboardStatCard
 								label="Scholarship Eligibility"
-								value={<Badge variant="default">Not yet eligible</Badge>}
+								value={<Badge variant="secondary">Not yet eligible</Badge>}
 								subtitle="placeholder"
 							/>
 						</div>

@@ -17,11 +17,13 @@ export const getRecommendations = async (
 	limit = 4,
 ): Promise<Recommendation[]> => {
 	// 1. Fetch user profile (for reputation)
-	const profileResult = await pool.query(
-		"SELECT reputation_rank FROM user_profiles WHERE stellar_address = $1 OR address = $1 LIMIT 1",
-		[walletAddress]
-	).catch(() => ({ rows: [] }))
-	
+	const profileResult = await pool
+		.query(
+			"SELECT reputation_rank FROM user_profiles WHERE stellar_address = $1 OR address = $1 LIMIT 1",
+			[walletAddress],
+		)
+		.catch(() => ({ rows: [] }))
+
 	const reputation = Number(profileResult.rows[0]?.reputation_rank || 0)
 
 	// 2. Fetch completed courses (earned skills)
@@ -30,15 +32,15 @@ export const getRecommendations = async (
 		 FROM scholar_nfts s
 		 JOIN courses c ON s.course_id = c.slug
 		 WHERE s.scholar_address = $1 AND s.revoked = FALSE`,
-		[walletAddress]
+		[walletAddress],
 	)
-	
+
 	const completedCourses = completedResult.rows
 	const completedSlugs = new Set(completedCourses.map((c: any) => c.slug))
-	
+
 	// Determine earned skills (tracks user has completed at least one course in)
 	const earnedTracks = new Set(completedCourses.map((c: any) => c.track))
-	
+
 	// Determine highest difficulty completed per track
 	const trackMaxDifficulty: Record<string, number> = {}
 	const difficultyLevel: Record<string, number> = {
@@ -46,7 +48,7 @@ export const getRecommendations = async (
 		intermediate: 2,
 		advanced: 3,
 	}
-	
+
 	for (const c of completedCourses) {
 		const level = difficultyLevel[c.difficulty] || 1
 		if (!trackMaxDifficulty[c.track] || level > trackMaxDifficulty[c.track]) {
@@ -57,17 +59,19 @@ export const getRecommendations = async (
 	// 3. Fetch active enrollments to exclude them
 	const enrolledResult = await pool.query(
 		"SELECT course_id FROM enrollments WHERE learner_address = $1",
-		[walletAddress]
+		[walletAddress],
 	)
-	const enrolledSlugs = new Set(enrolledResult.rows.map((r: any) => r.course_id))
+	const enrolledSlugs = new Set(
+		enrolledResult.rows.map((r: any) => r.course_id),
+	)
 
 	// 4. Fetch all available courses
 	const availableCoursesResult = await pool.query(
 		`SELECT id, slug, title, description, cover_image_url as "coverImage", track, difficulty, prerequisites 
 		 FROM courses 
-		 WHERE published_at IS NOT NULL`
+		 WHERE published_at IS NOT NULL`,
 	)
-	
+
 	const allCourses = availableCoursesResult.rows
 
 	// 5. Score courses
@@ -84,7 +88,7 @@ export const getRecommendations = async (
 		if (course.prerequisites && course.prerequisites.length > 0) {
 			const prereqsResult = await pool.query(
 				"SELECT slug FROM courses WHERE id = ANY($1::integer[])",
-				[course.prerequisites]
+				[course.prerequisites],
 			)
 			for (const req of prereqsResult.rows) {
 				if (!completedSlugs.has(req.slug)) {
@@ -93,12 +97,12 @@ export const getRecommendations = async (
 				}
 			}
 		}
-		
+
 		if (!meetsPrereqs) continue
 
 		let score = 0
 		let reason = ""
-		
+
 		const courseLevel = difficultyLevel[course.difficulty] || 1
 
 		// Rule 1: Earned Skills & Difficulty Progression
@@ -147,7 +151,7 @@ export const getRecommendations = async (
 
 	// 6. Sort by score descending and return top N
 	scoredCourses.sort((a, b) => b.score - a.score)
-	
+
 	return scoredCourses.slice(0, limit)
 }
 
@@ -158,12 +162,17 @@ export const logRecommendationEngagement = async (
 ): Promise<void> => {
 	try {
 		await pool.query(
-			\`INSERT INTO platform_events (event_type, data) 
-			 VALUES ($1, $2)\`,
+			`INSERT INTO platform_events (event_type, data)
+			 VALUES ($1, $2)`,
 			[
 				"RECOMMENDATION_ENGAGEMENT",
-				JSON.stringify({ walletAddress, courseSlug, action, timestamp: new Date().toISOString() })
-			]
+				JSON.stringify({
+					walletAddress,
+					courseSlug,
+					action,
+					timestamp: new Date().toISOString(),
+				}),
+			],
 		)
 	} catch (error) {
 		console.error("Failed to log recommendation engagement:", error)

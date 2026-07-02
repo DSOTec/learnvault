@@ -1,7 +1,10 @@
 import { Pool, type PoolConfig } from "pg"
 
+import { logger } from "../lib/logger"
 import { poolMonitor } from "../services/pool-monitor.service"
 import { resolvePoolEnvConfig } from "./pool-config"
+
+const log = logger.child({ module: "db" })
 
 // Environment-specific pool configuration
 const getPoolConfig = () => {

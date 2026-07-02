@@ -39,7 +39,6 @@
   ],
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "^2.0.1",
-    "@rolldown/binding-darwin-x64": "^1.1.1",
     "@sentry/browser": "^9.0.0",
     "@sentry/react": "^9.0.0",
     "@stellar/design-system": "^3.2.7",

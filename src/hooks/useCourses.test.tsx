@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
-import { renderHook, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { renderHook, waitFor } from "@testing-library/react"
+import { type ReactNode } from "react"
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import { useCourses, useEnrolledCourses, useCourseDetail } from "./useCourses"
-import type { ReactNode } from "react"
 
 // Mock fetch
 global.fetch = vi.fn()
@@ -104,9 +104,7 @@ describe("useCourses", () => {
 	})
 
 	const wrapper = ({ children }: { children: ReactNode }) => (
-		<QueryClientProvider client={queryClient}>
-			{children}
-		</QueryClientProvider>
+		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 	)
 
 	it("fetches and returns courses", async () => {
@@ -224,9 +222,7 @@ describe("useEnrolledCourses", () => {
 	})
 
 	const wrapper = ({ children }: { children: ReactNode }) => (
-		<QueryClientProvider client={queryClient}>
-			{children}
-		</QueryClientProvider>
+		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 	)
 
 	it("fetches and returns enrolled courses", async () => {
@@ -314,9 +310,7 @@ describe("useCourseDetail", () => {
 	})
 
 	const wrapper = ({ children }: { children: ReactNode }) => (
-		<QueryClientProvider client={queryClient}>
-			{children}
-		</QueryClientProvider>
+		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 	)
 
 	it("fetches course detail with lessons", async () => {
@@ -325,10 +319,9 @@ describe("useCourseDetail", () => {
 			json: async () => mockCourseDetail,
 		})
 
-		const { result } = renderHook(
-			() => useCourseDetail("stellar-basics"),
-			{ wrapper },
-		)
+		const { result } = renderHook(() => useCourseDetail("stellar-basics"), {
+			wrapper,
+		})
 
 		await waitFor(() => {
 			expect(result.current.isLoading).toBe(false)
@@ -342,10 +335,7 @@ describe("useCourseDetail", () => {
 	it("sorts lessons by order", async () => {
 		const unsortedCourse = {
 			...mockCourseDetail,
-			lessons: [
-				mockCourseDetail.lessons[1],
-				mockCourseDetail.lessons[0],
-			],
+			lessons: [mockCourseDetail.lessons[1], mockCourseDetail.lessons[0]],
 		}
 
 		;(global.fetch as any).mockResolvedValueOnce({
@@ -353,10 +343,9 @@ describe("useCourseDetail", () => {
 			json: async () => unsortedCourse,
 		})
 
-		const { result } = renderHook(
-			() => useCourseDetail("stellar-basics"),
-			{ wrapper },
-		)
+		const { result } = renderHook(() => useCourseDetail("stellar-basics"), {
+			wrapper,
+		})
 
 		await waitFor(() => {
 			expect(result.current.isLoading).toBe(false)
@@ -372,10 +361,9 @@ describe("useCourseDetail", () => {
 			json: async () => mockCourseDetail,
 		})
 
-		renderHook(
-			() => useCourseDetail("stellar-basics", "GLEARNER123"),
-			{ wrapper },
-		)
+		renderHook(() => useCourseDetail("stellar-basics", "GLEARNER123"), {
+			wrapper,
+		})
 
 		await waitFor(() => {
 			expect(global.fetch).toHaveBeenCalledWith(
@@ -394,10 +382,9 @@ describe("useCourseDetail", () => {
 	it("handles fetch errors", async () => {
 		;(global.fetch as any).mockRejectedValueOnce(new Error("Not found"))
 
-		const { result } = renderHook(
-			() => useCourseDetail("invalid-course"),
-			{ wrapper },
-		)
+		const { result } = renderHook(() => useCourseDetail("invalid-course"), {
+			wrapper,
+		})
 
 		await waitFor(() => {
 			expect(result.current.isLoading).toBe(false)
@@ -413,10 +400,9 @@ describe("useCourseDetail", () => {
 			json: async () => mockCourseDetail,
 		})
 
-		const { result } = renderHook(
-			() => useCourseDetail("stellar-basics"),
-			{ wrapper },
-		)
+		const { result } = renderHook(() => useCourseDetail("stellar-basics"), {
+			wrapper,
+		})
 
 		await waitFor(() => {
 			expect(result.current.isLoading).toBe(false)
@@ -434,10 +420,9 @@ describe("useCourseDetail", () => {
 			json: async () => mockCourseDetail,
 		})
 
-		const { result } = renderHook(
-			() => useCourseDetail("stellar-basics"),
-			{ wrapper },
-		)
+		const { result } = renderHook(() => useCourseDetail("stellar-basics"), {
+			wrapper,
+		})
 
 		await waitFor(() => {
 			expect(result.current.isLoading).toBe(false)
@@ -455,10 +440,9 @@ describe("useCourseDetail", () => {
 			json: async () => mockCourseDetail,
 		})
 
-		const { result } = renderHook(
-			() => useCourseDetail("stellar-basics"),
-			{ wrapper },
-		)
+		const { result } = renderHook(() => useCourseDetail("stellar-basics"), {
+			wrapper,
+		})
 
 		await waitFor(() => {
 			expect(result.current.isLoading).toBe(false)

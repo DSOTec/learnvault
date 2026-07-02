@@ -3,6 +3,9 @@ import { pool } from "./index"
 export type NotificationType =
 	| "milestone_approved"
 	| "milestone_rejected"
+	| "milestone_appeal"
+	| "milestone_appeal_approved"
+	| "milestone_appeal_rejected"
 	| "vote_result"
 	| "disbursement"
 	| "proposal_passed"
@@ -44,8 +47,12 @@ export interface PushSubscriptionInput {
 export interface NotificationPreferences {
 	milestone_approved: boolean
 	milestone_rejected: boolean
+	milestone_appeal: boolean
+	milestone_appeal_approved: boolean
+	milestone_appeal_rejected: boolean
 	vote_result: boolean
 	disbursement: boolean
+	proposal_passed: boolean
 	voting_deadline_reminder: boolean
 	email_milestone_approved: boolean
 	email_milestone_rejected: boolean

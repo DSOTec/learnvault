@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react"
 import { useNavigate } from "react-router-dom"
-import CourseCard from "./CourseCard"
 import { WalletContext } from "../providers/WalletProvider"
+import CourseCard from "./CourseCard"
 
 export interface Recommendation {
 	courseId: string
@@ -28,17 +28,17 @@ const RecommendationsCarousel: React.FC = () => {
 		const fetchRecommendations = async () => {
 			setIsLoading(true)
 			try {
-				const res = await fetch(\`/api/recommendations?limit=4\`, {
-					headers: { "Content-Type": "application/json" }
+				const res = await fetch(`/api/recommendations?limit=4`, {
+					headers: { "Content-Type": "application/json" },
 				})
 				if (!res.ok) throw new Error("Failed to fetch recommendations")
 				const data = await res.json()
 				if (mounted && data?.data) {
 					setRecommendations(data.data)
-					
+
 					// Log view events
 					data.data.forEach((rec: Recommendation) => {
-						void fetch(\`/api/recommendations/engage\`, {
+						void fetch(`/api/recommendations/engage`, {
 							method: "POST",
 							headers: { "Content-Type": "application/json" },
 							body: JSON.stringify({ courseSlug: rec.slug, action: "view" }),
@@ -62,7 +62,7 @@ const RecommendationsCarousel: React.FC = () => {
 	const handleEnrollClick = async (slug: string) => {
 		// Log click event
 		try {
-			await fetch(\`/api/recommendations/engage\`, {
+			await fetch(`/api/recommendations/engage`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ courseSlug: slug, action: "click" }),
@@ -70,16 +70,18 @@ const RecommendationsCarousel: React.FC = () => {
 		} catch (error) {
 			console.error("Failed to log click:", error)
 		}
-		
+
 		// Navigate to course page for enrollment
-		navigate(\`/courses/\${slug}\`)
+		void navigate(`/courses/\${slug}`)
 	}
 
 	if (isLoading) {
 		return (
 			<section className="space-y-6" aria-label="Recommended courses">
 				<h2 className="text-xl sm:text-2xl md:text-3xl font-black flex items-center gap-3">
-					<span className="text-2xl sm:text-3xl" aria-hidden="true">🎯</span>
+					<span className="text-2xl sm:text-3xl" aria-hidden="true">
+						🎯
+					</span>
 					Recommended For You
 				</h2>
 				<div className="flex gap-4 overflow-x-auto pb-4 snap-x">
@@ -99,12 +101,17 @@ const RecommendationsCarousel: React.FC = () => {
 	return (
 		<section className="space-y-6" aria-label="Recommended courses">
 			<h2 className="text-xl sm:text-2xl md:text-3xl font-black flex items-center gap-3">
-				<span className="text-2xl sm:text-3xl" aria-hidden="true">🎯</span>
+				<span className="text-2xl sm:text-3xl" aria-hidden="true">
+					🎯
+				</span>
 				Recommended For You
 			</h2>
 			<div className="flex gap-6 overflow-x-auto pb-6 snap-x hide-scrollbar">
 				{recommendations.map((course) => (
-					<div key={course.courseId} className="flex-none w-80 sm:w-96 snap-center flex flex-col relative group">
+					<div
+						key={course.courseId}
+						className="flex-none w-80 sm:w-96 snap-center flex flex-col relative group"
+					>
 						<CourseCard
 							id={course.slug}
 							title={course.title}
