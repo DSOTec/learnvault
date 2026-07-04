@@ -1201,12 +1201,10 @@ async function getGovernanceDelegation(
 	}
 }
 
-async function getEnrolledCourses(address: string): Promise<string[]> {
-	if (!COURSE_MILESTONE_CONTRACT_ID) {
-		log.warn("COURSE_MILESTONE_CONTRACT_ID not set — simulating enrollments")
-		return ["stellar-basics", "defi-101"]
-	}
-	return ["stellar-basics", "defi-101"]
+async function getEnrolledCourses(_address: string): Promise<string[]> {
+	// Not yet implemented — requires on-chain query to course_milestone contract.
+	// See GitHub issue: "On-chain enrollment query (getEnrolledCourses)"
+	return []
 }
 
 async function getScholarCredentials(address: string): Promise<any[]> {

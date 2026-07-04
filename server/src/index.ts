@@ -45,7 +45,6 @@ import { eventsRouter } from "./routes/events.routes"
 import { createForumRouter } from "./routes/forum.routes"
 import { governanceRouter } from "./routes/governance.routes"
 import { healthRouter } from "./routes/health.routes"
-import { leaderboardRouter } from "./routes/leaderboard.routes"
 import { lrnRouter } from "./routes/lrn.routes"
 import { createMeRouter } from "./routes/me.routes"
 import { mentorshipRouter } from "./routes/mentorship.routes"
@@ -281,7 +280,6 @@ app.use("/api/community", communityRouter)
 app.use("/api", antiSybilRouter)
 app.use("/api", createCommentsRouter(jwtService))
 app.use("/api", createPeerReviewRouter(jwtService))
-app.use("/api", leaderboardRouter)
 app.use("/api", governanceRouter)
 app.use("/api", lrnRouter)
 app.use("/api", treasuryRouter)

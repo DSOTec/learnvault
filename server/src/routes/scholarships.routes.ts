@@ -2,7 +2,6 @@ import { Router } from "express"
 
 import {
 	applyForScholarship,
-	contributeToScholarship,
 	getScholarshipMetrics,
 } from "../controllers/scholarships.controller"
 import { scholarshipApplyLimiter } from "../middleware/rate-limit.middleware"
