@@ -3,6 +3,9 @@
   "type": "module",
   "version": "0.0.1",
   "private": true,
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "overrides": {
     "protobufjs": ">=7.5.5",
     "long": ">=5.3.2"
